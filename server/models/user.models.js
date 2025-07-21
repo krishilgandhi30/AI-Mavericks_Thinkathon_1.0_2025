@@ -39,15 +39,14 @@ const userSchema = new mongoose.Schema({
     // Doctor specific fields
     specialization: { 
         type: String, 
-        default: '',
-        enum: ['', 'General Medicine', 'Cardiology', 'Endocrinology', 'Nephrology', 'Hematology', 'Other']
+        default: ''
     },
     licenseNumber: { type: String, default: '' },
     yearsOfExperience: { type: Number, default: 0 },
     
     // Patient specific fields
     dateOfBirth: { type: Date },
-    gender: { type: String, enum: ['male', 'female', 'other'], default: 'other' },
+    gender: { type: String, default: '' },
     medicalHistory: [{ type: String }],
 
     resetPasswordToken: String,

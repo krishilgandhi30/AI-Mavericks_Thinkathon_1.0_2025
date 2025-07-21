@@ -27,7 +27,7 @@ const PatientDashboard = () => {
                 return;
             }
             
-            const response = await axios.get('http://localhost:3334/api/users/profile', {
+            const response = await axios.get('http://localhost:5000/api/users/profile', {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setUser(response.data);
@@ -56,7 +56,7 @@ const PatientDashboard = () => {
     const fetchHealthReports = async () => {
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.get('http://localhost:3334/api/health-reports/patient/reports', {
+            const response = await axios.get('http://localhost:5000/api/health-reports/patient/reports', {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setHealthReports(response.data.reports);

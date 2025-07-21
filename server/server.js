@@ -1,43 +1,51 @@
-import express from "express";
-import mongoose from "mongoose";
-import dotenv from "dotenv";
-import cors from "cors";
+import express from 'express';
+import mongoose from 'mongoose';
+import cors from 'cors';
+import dotenv from 'dotenv';
 
-// Import your route files
-import authRoutes from '../server/routes/auth.routes.js';
-import userRoutes from '../server/routes/user.routes.js';
-import adminRoutes from '../server/routes/admin.routes.js';
-import healthReportRoutes from '../server/routes/healthReport.routes.js';
-import doctorReviewRoutes from '../server/routes/doctorReview.routes.js';
+// Load environment variables
+dotenv.config();
 
-dotenv.config(); // Load environment variables from .env
+// Import routes
+import authRoutes from './routes/auth.routes.js';
+import userRoutes from './routes/user.routes.js';
+import doctorReviewRoutes from './routes/doctorReview.routes.js';
+import healthReportRoutes from './routes/healthReport.routes.js';
 
+// Initialize app
 const app = express();
 
+// Connect to MongoDB
+mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/healthcare-ai')
+  .then(() => console.log('MongoDB Connected'))
+  .catch(err => {
+    console.error('MongoDB Connection Error:', err);
+    process.exit(1);
+  });
+
 // Middleware
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cors());
+app.use(express.json({ extended: false }));
 
-// MongoDB Connection
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/thinkathon_ai_health')
-.then(() => console.log("✅ MongoDB Connected to Thinkathon"))
-.catch(err => console.error("❌ MongoDB connection error:", err));
-
-// Routes
+// Define Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
-app.use('/api/admin', adminRoutes);
-app.use('/api/health-reports', healthReportRoutes);
 app.use('/api/doctor-review', doctorReviewRoutes);
+app.use('/api/health-reports', healthReportRoutes);
 
-// Health Check Endpoint
-app.get('/api/health', (req, res) => {
-    res.json({ status: 'OK', timestamp: new Date().toISOString() });
+// Basic route
+app.get('/', (req, res) => {
+  res.send('API Running');
 });
 
-// Start the server
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ message: 'Something went wrong!' });
+});
+
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () =>
-    console.log(`🚀 Server running at http://localhost:${PORT}`)
-);
+
+app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
+
+export default app;

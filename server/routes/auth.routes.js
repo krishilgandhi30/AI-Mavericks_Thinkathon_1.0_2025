@@ -15,14 +15,4 @@ router.post("/forgot-password", forgotpassword);
 
 router.post("/reset-password/:token", resetpassword);
 
-// 🛡️ Example protected route
-router.get("/me", Authenticate, async (req, res) => {
-	try {
-		const user = await User.findById(req.user.id).select("-password");
-		res.json(user);
-	} catch (err) {
-		res.status(500).json({ msg: "Something went wrong" });
-	}
-});
-
 export default router;

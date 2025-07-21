@@ -68,7 +68,7 @@ const HealthReportUpload = () => {
                 urineMetrics: reportData.reportType === 'urine' ? reportData.urineMetrics : undefined
             };
 
-            const response = await axios.post('http://localhost:3334/api/health-reports/upload', submitData, {
+            const response = await axios.post('http://localhost:5000/api/health-reports/upload', submitData, {
                 headers: { Authorization: `Bearer ${token}` }
             });
 
