@@ -1,0 +1,33 @@
+# Ignore node_modules in both client and server
+client/node_modules/
+server/node_modules/
+
+# Ignore environment files
+client/.env
+server/.env
+.env
+
+# Ignore build/output folders
+client/build/
+client/dist/
+server/dist/
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# npm/Yarn/PNPM lock files (optional, keep one if using)
+client/package-lock.json
+server/package-lock.json
+client/yarn.lock
+server/yarn.lock
+
+# VSCode or IDE configs (optional)
+.vscode/
+.idea/
+
+# Coverage/testing
+coverage/
