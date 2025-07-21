@@ -6,6 +6,7 @@ import DoctorDashboard from './DoctorDashboard';
 
 const RoleBasedDashboard = () => {
 	const [userRole, setUserRole] = useState(null);
+	const [userData, setUserData] = useState(null);
 	const [loading, setLoading] = useState(true);
 	const navigate = useNavigate();
 
@@ -21,11 +22,12 @@ const RoleBasedDashboard = () => {
 				return;
 			}
 
-			const response = await axios.get('http://localhost:3334/api/users/profile', {
+			const response = await axios.get('http://localhost:5000/api/users/profile', {
 				headers: { Authorization: `Bearer ${token}` }
 			});
 
 			const user = response.data;
+			setUserData(user); // Store full user data
 			setUserRole(user.role);
 			setLoading(false);
 
@@ -55,11 +57,11 @@ const RoleBasedDashboard = () => {
 
 	// Route based on user role
 	if (userRole === 'doctor') {
-		return <DoctorDashboard />;
+		return <DoctorDashboard userData={userData} />;
 	}
 
 	// Default to regular PatientDashboard for patients
-	return <PatientDashboard />;
+	return <PatientDashboard userData={userData} />;
 };
 
 export default RoleBasedDashboard;

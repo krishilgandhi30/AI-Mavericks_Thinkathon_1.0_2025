@@ -129,7 +129,7 @@ function SignUp() {
 		setMessage(null);
 
 		try {
-			const response = await axios.post("http://localhost:3334/api/auth/signup", {
+			const response = await axios.post("http://localhost:5000/api/auth/signup", {
 				username: formData.username,
 				fullName: formData.fullName,
 				email: formData.email,
