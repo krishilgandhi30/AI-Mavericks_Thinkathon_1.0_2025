@@ -209,11 +209,51 @@ export const provideFeedbackToAI = async (req, res) => {
     }
 };
 
+// Get pending recommendations for review
+export const getPendingRecommendations = async (req, res) => {
+    try {
+        const recommendations = await Recommendation.find({ 
+            doctorId: null, 
+            reviewStatus: 'pending' 
+        })
+        .populate('patientId', 'fullName')
+        .populate('reportId', 'reportType')
+        .sort({ createdAt: -1 });
+
+        res.json({ recommendations });
+    } catch (error) {
+        console.error('Error fetching pending recommendations:', error);
+        res.status(500).json({ message: 'Failed to fetch pending recommendations' });
+    }
+};
+
+// Get recommendations assigned to the current doctor
+export const getAssignedRecommendations = async (req, res) => {
+    try {
+        const doctorId = req.user.id;
+        
+        const recommendations = await Recommendation.find({ 
+            doctorId,
+            reviewStatus: { $in: ['pending', 'under_review'] }
+        })
+        .populate('patientId', 'fullName')
+        .populate('reportId', 'reportType')
+        .sort({ assignedAt: -1 });
+
+        res.json({ recommendations });
+    } catch (error) {
+        console.error('Error fetching assigned recommendations:', error);
+        res.status(500).json({ message: 'Failed to fetch assigned recommendations' });
+    }
+};
+
 export default {
     getRecommendationDetails,
     updateRecommendation,
     approveRecommendation,
     rejectRecommendation,
     getDoctorDashboardStats,
-    provideFeedbackToAI
+    provideFeedbackToAI,
+    getPendingRecommendations,
+    getAssignedRecommendations
 };

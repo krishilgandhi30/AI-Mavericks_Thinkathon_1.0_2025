@@ -1,0 +1,2 @@
+// react-icons is a peer dependency for icon support
+// Run this file to install react-icons if not already present

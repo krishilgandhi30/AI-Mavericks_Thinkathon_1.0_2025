@@ -5,14 +5,20 @@ import {
     approveRecommendation,
     rejectRecommendation,
     getDoctorDashboardStats,
-    provideFeedbackToAI
+    provideFeedbackToAI,
+    getPendingRecommendations,
+    getAssignedRecommendations
 } from '../controllers/doctorReview.controllers.js';
 import { Authenticate } from '../middleware/auth.middleware.js';
 
 const router = express.Router();
 
 // Doctor dashboard and statistics
-router.get('/dashboard/stats', Authenticate, getDoctorDashboardStats);
+router.get('/stats', Authenticate, getDoctorDashboardStats);
+
+// Add specific routes BEFORE parameterized routes
+router.get('/pending', Authenticate, getPendingRecommendations);
+router.get('/assigned', Authenticate, getAssignedRecommendations);
 
 // Recommendation review routes
 router.get('/:recommendationId', Authenticate, getRecommendationDetails);
