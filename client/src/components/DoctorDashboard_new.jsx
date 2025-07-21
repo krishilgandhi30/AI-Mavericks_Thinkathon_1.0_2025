@@ -78,7 +78,7 @@ const DoctorDashboard = () => {
     const fetchDashboardStats = async () => {
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.get('http://localhost:3334/api/doctor-review/stats', {
+            const response = await axios.get('http://localhost:5000/api/doctor-review/stats', {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setStats(response.data);
@@ -90,7 +90,7 @@ const DoctorDashboard = () => {
     const fetchPendingRecommendations = async () => {
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.get('http://localhost:3334/api/doctor-review/pending', {
+            const response = await axios.get('http://localhost:5000/api/doctor-review/pending', {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setRecommendations(response.data.recommendations || []);
@@ -102,7 +102,7 @@ const DoctorDashboard = () => {
     const fetchAssignedRecommendations = async () => {
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.get('http://localhost:3334/api/doctor-review/assigned', {
+            const response = await axios.get('http://localhost:5000/api/doctor-review/assigned', {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setRecommendations(response.data.recommendations || []);
@@ -114,7 +114,7 @@ const DoctorDashboard = () => {
     const assignToSelf = async (recommendationId) => {
         try {
             const token = localStorage.getItem('token');
-            await axios.post(`http://localhost:3334/api/health-reports/${recommendationId}/assign`, {}, {
+            await axios.post(`http://localhost:5000/api/health-reports/${recommendationId}/assign`, {}, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             
@@ -129,7 +129,7 @@ const DoctorDashboard = () => {
     const openRecommendationDetails = async (recommendation) => {
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.get(`http://localhost:3334/api/doctor-review/${recommendation._id}`, {
+            const response = await axios.get(`http://localhost:5000/api/doctor-review/${recommendation._id}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setSelectedRecommendation(response.data.recommendation);
@@ -163,7 +163,7 @@ const DoctorDashboard = () => {
     const approveRecommendation = async () => {
         try {
             const token = localStorage.getItem('token');
-            await axios.post(`http://localhost:3334/api/doctor-review/${selectedRecommendation._id}/approve`, {
+            await axios.post(`http://localhost:5000/api/doctor-review/${selectedRecommendation._id}/approve`, {
                 finalRecommendations: {
                     treatmentPlan: reviewData.modifications.treatmentPlan,
                     lifestyleChanges: reviewData.modifications.lifestyleChanges
@@ -185,7 +185,7 @@ const DoctorDashboard = () => {
     const requestModifications = async () => {
         try {
             const token = localStorage.getItem('token');
-            await axios.post(`http://localhost:3334/api/doctor-review/${selectedRecommendation._id}/request-modifications`, {
+            await axios.post(`http://localhost:5000/api/doctor-review/${selectedRecommendation._id}/request-modifications`, {
                 feedbackToAI: reviewData.doctorFeedbackToAI,
                 requestedChanges: reviewData.modifications
             }, {

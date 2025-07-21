@@ -21,7 +21,7 @@ const RoleBasedDashboard = () => {
 				return;
 			}
 
-			const response = await axios.get('http://localhost:3334/api/users/profile', {
+			const response = await axios.get('http://localhost:5000/api/users/profile', {
 				headers: { Authorization: `Bearer ${token}` }
 			});
 

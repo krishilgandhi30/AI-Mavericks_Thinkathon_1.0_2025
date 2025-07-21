@@ -33,7 +33,7 @@ function ForgotPassword() {
 		}
 
 		try {
-			const res = await axios.post("http://localhost:3334/api/auth/forgot-password", { email });
+			const res = await axios.post("http://localhost:5000/api/auth/forgot-password", { email });
 			setMessage(res.data.message || "Reset link sent to your email");
 			setResetLink(res.data.resetLink);
 			setToken(res.data.token);
