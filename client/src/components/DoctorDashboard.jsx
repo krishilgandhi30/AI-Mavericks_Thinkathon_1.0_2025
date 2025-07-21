@@ -458,7 +458,15 @@ useEffect(() => {
                                         <h5>Medications:</h5>
                                         <ul>
                                             {selectedRecommendation.aiSuggestions.treatmentPlan.medications.map((med, idx) => (
-                                                <li key={idx}>{med}</li>
+                                                <li key={idx}>
+                                                    {typeof med === 'string' ? med : (
+                                                        <div>
+                                                            <strong>{med.name}</strong> - {med.dosage}, {med.frequency}
+                                                            {med.duration && <span> for {med.duration}</span>}
+                                                            {med.notes && <div style={{fontSize: '0.9em', color: '#666', marginTop: '4px'}}>Note: {med.notes}</div>}
+                                                        </div>
+                                                    )}
+                                                </li>
                                             ))}
                                         </ul>
                                     </div>

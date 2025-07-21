@@ -577,6 +577,35 @@
   box-shadow: 0 3px 10px rgba(231, 76, 60, 0.3);
 }
 
+/* Report Actions */
+.report-actions {
+  padding: 15px 20px;
+  background: #f8f9fa;
+  border-top: 1px solid #e9ecef;
+}
+
+.btn-insights {
+  background: linear-gradient(135deg, #6f42c1, #5a2d91);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-insights:hover {
+  background: linear-gradient(135deg, #5a2d91, #4a1e7a);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(111, 66, 193, 0.3);
+}
+
 @media (max-width: 768px) {
   .profile-info {
     grid-template-columns: 1fr;
@@ -589,5 +618,14 @@
   .nav-user {
     flex-direction: column;
     gap: 10px;
+  }
+
+  .reports-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .btn-insights {
+    font-size: 0.9rem;
+    padding: 12px;
   }
 }

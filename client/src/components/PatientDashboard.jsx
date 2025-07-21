@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import HealthReportUpload from './HealthReportUpload';
+import HealthInsights from './HealthInsights';
 import './PatientDashboard.css';
 
 const PatientDashboard = () => {
@@ -9,6 +10,7 @@ const PatientDashboard = () => {
     const [user, setUser] = useState(null);
     const [healthReports, setHealthReports] = useState([]);
     const [recommendations, setRecommendations] = useState([]);
+    const [selectedReportId, setSelectedReportId] = useState(null);
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
 
@@ -208,6 +210,18 @@ const PatientDashboard = () => {
                             )}
                         </div>
 
+                        <div className="report-actions">
+                            <button 
+                                className="btn-insights"
+                                onClick={() => {
+                                    setSelectedReportId(report._id);
+                                    setActiveTab('insights');
+                                }}
+                            >
+                                🤖 View AI Insights
+                            </button>
+                        </div>
+
                         {report.recommendation?.finalRecommendations && (
                             <div className="recommendations-preview">
                                 <h4>Recommendations</h4>
@@ -374,6 +388,12 @@ const PatientDashboard = () => {
                     >
                         My Reports
                     </button>
+                    <button 
+                        className={`nav-tab ${activeTab === 'insights' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('insights')}
+                    >
+                        AI Insights
+                    </button>
                 </div>
                 <div className="nav-user">
                     <button 
@@ -398,6 +418,7 @@ const PatientDashboard = () => {
                 {activeTab === 'dashboard' && renderDashboard()}
                 {activeTab === 'upload' && <HealthReportUpload />}
                 {activeTab === 'reports' && renderReports()}
+                {activeTab === 'insights' && <HealthInsights reportId={selectedReportId} />}
                 {activeTab === 'profile' && renderProfile()}
             </main>
         </div>
