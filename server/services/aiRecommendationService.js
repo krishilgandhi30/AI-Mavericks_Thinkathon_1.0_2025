@@ -4,9 +4,9 @@ class AIHealthRecommendationService {
     constructor() {
         // Initialize OpenAI (optional - you can use this with a real API key)
         // Commenting out OpenAI for now to avoid import issues
-        this.openai = new OpenAI({
-            apiKey: process.env.OPENAI_API_KEY
-        });
+        // this.openai = new OpenAI({
+        //     apiKey: process.env.OPENAI_API_KEY
+        // });
     }
 
     // Enhanced AI analysis with more sophisticated logic

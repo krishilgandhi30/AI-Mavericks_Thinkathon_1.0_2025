@@ -611,11 +611,17 @@ const DoctorDashboard = ({ userData }) => {
     // Always render a component structure to maintain consistent hook calls
     return (
       <div className="recommendation-details-container">
-        <div className="review-header">
-          <button className="btn-back" onClick={() => setSelectedRecommendation(null)}>
-            <span style={{marginRight: '8px'}}>←</span> Back to Dashboard
-          </button>
-          <h2>Review Recommendation</h2>
+        {/* Professional Navigation Header - Single Card Style */}
+        <div className="review-header-card">
+          <div className="review-navigation">
+            <button className="back-button" onClick={() => setSelectedRecommendation(null)}>
+              ← Back to My Assignments
+            </button>
+            <div className="review-title-section">
+              <h2>Review AI Recommendation</h2>
+              <p className="review-subtitle">Patient: {selectedRecommendation?.patientId?.fullName || 'Loading...'}</p>
+            </div>
+          </div>
         </div>
 
         {loading ? (

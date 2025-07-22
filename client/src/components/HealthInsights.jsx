@@ -2,9 +2,8 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './HealthInsights.css';
 
-const HealthInsights = ({ reportId }) => {
+const HealthInsights = ({ reportId, onBack }) => {
     const [insights, setInsights] = useState(null);
-    const [personalizedRecommendations, setPersonalizedRecommendations] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [activeTab, setActiveTab] = useState('current');
@@ -14,7 +13,7 @@ const HealthInsights = ({ reportId }) => {
             fetchHealthInsights();
             fetchReportDetails();
         }
-        fetchPersonalizedRecommendations();
+        setLoading(false);
     }, [reportId]);
     
     const [reportDetails, setReportDetails] = useState(null);
@@ -29,21 +28,6 @@ const HealthInsights = ({ reportId }) => {
         } catch (error) {
             console.error('Error fetching health insights:', error);
             setError('Failed to fetch health insights');
-        }
-    };
-
-    const fetchPersonalizedRecommendations = async () => {
-        try {
-            const token = localStorage.getItem('token');
-            const response = await axios.get('http://localhost:5000/api/ai-recommendations/personalized', {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            setPersonalizedRecommendations(response.data);
-        } catch (error) {
-            console.error('Error fetching personalized recommendations:', error);
-            // Don't set error for personalized recommendations as it's optional
-        } finally {
-            setLoading(false);
         }
     };
     
@@ -64,15 +48,6 @@ const HealthInsights = ({ reportId }) => {
         if (score >= 80) return '#27ae60';
         if (score >= 60) return '#f39c12';
         return '#e74c3c';
-    };
-
-    const getTrendIcon = (trend) => {
-        switch (trend) {
-            case 'increasing': return '📈';
-            case 'decreasing': return '📉';
-            case 'stable': return '➡️';
-            default: return '❓';
-        }
     };
 
     const renderCurrentInsights = () => {
@@ -301,100 +276,6 @@ const HealthInsights = ({ reportId }) => {
         );
     };
 
-    const renderPersonalizedPlan = () => {
-        if (!personalizedRecommendations) return <div>No personalized recommendations available</div>;
-
-        const { trendAnalysis, recommendations } = personalizedRecommendations;
-
-        return (
-            <div className="personalized-plan">
-                <div className="plan-header">
-                    <h3>📊 Your Health Trends</h3>
-                    <p>Based on {personalizedRecommendations.reportsAnalyzed} reports over {personalizedRecommendations.timeRange}</p>
-                </div>
-
-                <div className="trends-grid">
-                    {Object.entries(trendAnalysis).filter(([key]) => key !== 'overallHealthTrend').map(([metric, data]) => (
-                        <div key={metric} className={`trend-card ${data.concern ? 'concern' : ''}`}>
-                            <div className="trend-header">
-                                <span className="trend-icon">{getTrendIcon(data.trend)}</span>
-                                <h4>{metric.charAt(0).toUpperCase() + metric.slice(1)}</h4>
-                            </div>
-                            <div className="trend-info">
-                                <span className={`trend-status ${data.trend}`}>
-                                    {data.trend.charAt(0).toUpperCase() + data.trend.slice(1)}
-                                </span>
-                                {data.concern && <span className="concern-badge">⚠️ Needs Attention</span>}
-                            </div>
-                        </div>
-                    ))}
-                </div>
-
-                <div className="plan-sections">
-                    {recommendations.priorities?.length > 0 && (
-                        <div className="plan-section priorities">
-                            <h4>🎯 Health Priorities</h4>
-                            <ul>
-                                {recommendations.priorities.map((priority, index) => (
-                                    <li key={index} className="priority-item">{priority}</li>
-                                ))}
-                            </ul>
-                        </div>
-                    )}
-
-                    <div className="goals-grid">
-                        {recommendations.shortTermGoals?.length > 0 && (
-                            <div className="plan-section short-term">
-                                <h4>📅 Short-term Goals (3 months)</h4>
-                                <ul>
-                                    {recommendations.shortTermGoals.map((goal, index) => (
-                                        <li key={index}>{goal}</li>
-                                    ))}
-                                </ul>
-                            </div>
-                        )}
-
-                        {recommendations.longTermGoals?.length > 0 && (
-                            <div className="plan-section long-term">
-                                <h4>🎯 Long-term Goals (1 year)</h4>
-                                <ul>
-                                    {recommendations.longTermGoals.map((goal, index) => (
-                                        <li key={index}>{goal}</li>
-                                    ))}
-                                </ul>
-                            </div>
-                        )}
-                    </div>
-
-                    {recommendations.actionItems?.length > 0 && (
-                        <div className="plan-section actions">
-                            <h4>✅ Action Items</h4>
-                            <div className="action-items">
-                                {recommendations.actionItems.map((action, index) => (
-                                    <div key={index} className="action-item">
-                                        <input type="checkbox" id={`action-${index}`} />
-                                        <label htmlFor={`action-${index}`}>{action}</label>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    )}
-
-                    {recommendations.successMetrics?.length > 0 && (
-                        <div className="plan-section metrics">
-                            <h4>📈 Success Metrics</h4>
-                            <ul>
-                                {recommendations.successMetrics.map((metric, index) => (
-                                    <li key={index}>{metric}</li>
-                                ))}
-                            </ul>
-                        </div>
-                    )}
-                </div>
-            </div>
-        );
-    };
-
     if (loading) {
         return (
             <div className="health-insights loading">
@@ -406,18 +287,24 @@ const HealthInsights = ({ reportId }) => {
 
     return (
         <div className="health-insights">
+            {/* Header with back button and navigation */}
+            <div className="insights-header">
+                <div className="insights-nav">
+                    {onBack && (
+                        <button className="back-button" onClick={onBack}>
+                            ← Back to Reports
+                        </button>
+                    )}
+                    <h2>AI Health Insights</h2>
+                </div>
+            </div>
+
             <div className="insights-tabs">
                 <button 
                     className={`tab-button ${activeTab === 'current' ? 'active' : ''}`}
                     onClick={() => setActiveTab('current')}
                 >
                     Current Report
-                </button>
-                <button 
-                    className={`tab-button ${activeTab === 'personalized' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('personalized')}
-                >
-                    Personalized Plan
                 </button>
                 <button 
                     className={`tab-button ${activeTab === 'doctor' ? 'active' : ''}`}
@@ -429,7 +316,6 @@ const HealthInsights = ({ reportId }) => {
 
             <div className="insights-content">
                 {activeTab === 'current' && renderCurrentInsights()}
-                {activeTab === 'personalized' && renderPersonalizedPlan()}
                 {activeTab === 'doctor' && renderDoctorRecommendations()}
             </div>
 
