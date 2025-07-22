@@ -39,6 +39,16 @@ const RoleBasedDashboard = () => {
 			} else {
 				// For demo purposes, default to patient role
 				setUserRole('patient');
+				// Create a demo user data object
+				setUserData({
+					_id: 'demo-patient',
+					fullName: 'John Doe',
+					username: 'johndoe',
+					email: 'john@example.com',
+					role: 'patient',
+					gender: 'male',
+					dateOfBirth: '1990-01-01'
+				});
 				setLoading(false);
 			}
 		}

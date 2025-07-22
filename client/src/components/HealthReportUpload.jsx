@@ -253,19 +253,59 @@ const HealthReportUpload = () => {
 
             {analysisResult && (
                 <div className="analysis-result">
-                    <h3>AI Analysis Complete</h3>
+                    <div className="analysis-header">
+                        <h3>🤖 AI Analysis Complete</h3>
+                        <div className="health-score">
+                            <div className="score-circle">
+                                <span className="score-number">{analysisResult.healthScore || 75}</span>
+                                <span className="score-label">Health Score</span>
+                            </div>
+                            <div className={`urgency-badge urgency-${analysisResult.urgencyLevel || 'medium'}`}>
+                                {analysisResult.urgencyLevel?.toUpperCase() || 'MEDIUM'} PRIORITY
+                            </div>
+                        </div>
+                    </div>
+
+                    {analysisResult.treatmentPlan?.emergencyWarnings?.length > 0 && (
+                        <div className="emergency-warnings">
+                            <h4>⚠️ Emergency Warnings</h4>
+                            <ul>
+                                {analysisResult.treatmentPlan.emergencyWarnings.map((warning, index) => (
+                                    <li key={index} className="emergency-warning">{warning}</li>
+                                ))}
+                            </ul>
+                        </div>
+                    )}
+
                     <div className="result-section">
-                        <h4>Treatment Plan</h4>
-                        <p>{analysisResult.treatmentPlan.summary}</p>
-                        {analysisResult.treatmentPlan.medications.length > 0 && (
+                        <h4>💊 Treatment Plan</h4>
+                        <p>{analysisResult.treatmentPlan?.summary}</p>
+                        {analysisResult.treatmentPlan?.medications?.length > 0 && (
                             <div className="medications">
                                 <h5>Recommended Medications:</h5>
-                                <ul>
+                                <div className="medication-cards">
                                     {analysisResult.treatmentPlan.medications.map((med, index) => (
-                                        <li key={index}>
-                                            <strong>{med.name}</strong> - {med.dosage}, {med.frequency}
-                                            {med.notes && <span className="med-notes"> ({med.notes})</span>}
-                                        </li>
+                                        <div key={index} className="medication-card">
+                                            <div className="med-header">
+                                                <strong>{med.name}</strong>
+                                                <span className="med-dosage">{med.dosage}</span>
+                                            </div>
+                                            <div className="med-details">
+                                                <p><strong>Frequency:</strong> {med.frequency}</p>
+                                                <p><strong>Duration:</strong> {med.duration}</p>
+                                                {med.notes && <p className="med-notes"><strong>Notes:</strong> {med.notes}</p>}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                        {analysisResult.treatmentPlan?.followUpTests?.length > 0 && (
+                            <div className="follow-up-tests">
+                                <h5>Follow-up Tests:</h5>
+                                <ul>
+                                    {analysisResult.treatmentPlan.followUpTests.map((test, index) => (
+                                        <li key={index}>{test}</li>
                                     ))}
                                 </ul>
                             </div>
@@ -273,33 +313,59 @@ const HealthReportUpload = () => {
                     </div>
                     
                     <div className="result-section">
-                        <h4>Lifestyle Changes</h4>
-                        <p>{analysisResult.lifestyleChanges.summary}</p>
-                        {analysisResult.lifestyleChanges.diet.length > 0 && (
-                            <div className="lifestyle-category">
-                                <h5>Diet:</h5>
-                                <ul>
-                                    {analysisResult.lifestyleChanges.diet.map((item, index) => (
-                                        <li key={index}>{item}</li>
-                                    ))}
-                                </ul>
-                            </div>
-                        )}
-                        {analysisResult.lifestyleChanges.exercise.length > 0 && (
-                            <div className="lifestyle-category">
-                                <h5>Exercise:</h5>
-                                <ul>
-                                    {analysisResult.lifestyleChanges.exercise.map((item, index) => (
-                                        <li key={index}>{item}</li>
-                                    ))}
-                                </ul>
-                            </div>
-                        )}
+                        <h4>🏃‍♂️ Lifestyle Recommendations</h4>
+                        <p>{analysisResult.lifestyleChanges?.summary}</p>
+                        
+                        <div className="lifestyle-grid">
+                            {analysisResult.lifestyleChanges?.diet?.length > 0 && (
+                                <div className="lifestyle-category">
+                                    <h5>🥗 Diet:</h5>
+                                    <ul>
+                                        {analysisResult.lifestyleChanges.diet.map((item, index) => (
+                                            <li key={index}>{item}</li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            )}
+                            
+                            {analysisResult.lifestyleChanges?.exercise?.length > 0 && (
+                                <div className="lifestyle-category">
+                                    <h5>💪 Exercise:</h5>
+                                    <ul>
+                                        {analysisResult.lifestyleChanges.exercise.map((item, index) => (
+                                            <li key={index}>{item}</li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            )}
+                            
+                            {analysisResult.lifestyleChanges?.habits?.length > 0 && (
+                                <div className="lifestyle-category">
+                                    <h5>😴 Healthy Habits:</h5>
+                                    <ul>
+                                        {analysisResult.lifestyleChanges.habits.map((item, index) => (
+                                            <li key={index}>{item}</li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            )}
+                            
+                            {analysisResult.lifestyleChanges?.supplements?.length > 0 && (
+                                <div className="lifestyle-category">
+                                    <h5>💊 Supplements:</h5>
+                                    <ul>
+                                        {analysisResult.lifestyleChanges.supplements.map((item, index) => (
+                                            <li key={index}>{item}</li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            )}
+                        </div>
                     </div>
 
-                    {analysisResult.riskFactors.length > 0 && (
+                    {analysisResult.riskFactors?.length > 0 && (
                         <div className="result-section risk-factors">
-                            <h4>Risk Factors Identified</h4>
+                            <h4>⚠️ Risk Factors Identified</h4>
                             <ul>
                                 {analysisResult.riskFactors.map((risk, index) => (
                                     <li key={index}>{risk}</li>
@@ -308,9 +374,23 @@ const HealthReportUpload = () => {
                         </div>
                     )}
 
+                    {analysisResult.preventiveRecommendations?.length > 0 && (
+                        <div className="result-section preventive">
+                            <h4>🛡️ Preventive Care</h4>
+                            <ul>
+                                {analysisResult.preventiveRecommendations.map((rec, index) => (
+                                    <li key={index}>{rec}</li>
+                                ))}
+                            </ul>
+                        </div>
+                    )}
+
                     <div className="result-footer">
+                        <div className="confidence-score">
+                            <p><strong>AI Confidence:</strong> {Math.round((analysisResult.confidenceScore || 0.8) * 100)}%</p>
+                        </div>
                         <p className="disclaimer">
-                            <strong>Note:</strong> These recommendations are AI-generated and require validation by a healthcare professional.
+                            <strong>Important:</strong> These AI-generated recommendations are for informational purposes only and require validation by a qualified healthcare professional before implementation.
                         </p>
                     </div>
                 </div>

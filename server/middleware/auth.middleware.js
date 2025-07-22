@@ -5,7 +5,7 @@ dotenv.config();
 export const Authenticate = (req, res, next) => {
     const authHeader = req.headers.authorization;
 
-    if (!authHeader || !authHeader.startsWith("Bearer ")){
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
         return res.status(401).json({ message: "No token, authorization denied" });
     }
 
@@ -15,10 +15,10 @@ export const Authenticate = (req, res, next) => {
         const decoded = jwt.verify(token, process.env.JWT_SECRET)
 
         req.user = decoded
-        
+
         next();
 
     } catch (error) {
-        res.status(401).json({message: "Token is not valid!"})
+        res.status(401).json({ message: "Token is not valid!" })
     }
 }
