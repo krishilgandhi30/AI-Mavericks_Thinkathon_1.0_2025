@@ -47,7 +47,9 @@ const userSchema = new mongoose.Schema({
     // Patient specific fields
     dateOfBirth: { type: Date },
     gender: { type: String, default: '' },
+    bloodGroup: { type: String, default: '' },
     medicalHistory: [{ type: String }],
+    age: { type: Number },
 
     resetPasswordToken: String,
     resetPasswordExpires: Date

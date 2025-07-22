@@ -8,12 +8,20 @@ export const getRecommendationDetails = async (req, res) => {
         const { recommendationId } = req.params;
         
         const recommendation = await Recommendation.findById(recommendationId)
-            .populate('patientId', 'fullName email gender dateOfBirth medicalHistory')
-            .populate('reportId')
+            .populate('patientId', 'fullName email gender dateOfBirth medicalHistory bloodGroup age')
+            .populate('reportId') // This includes all report data
             .populate('doctorId', 'fullName specialization');
 
         if (!recommendation) {
             return res.status(404).json({ message: 'Recommendation not found' });
+        }
+
+        // Get the full health report data
+        if (recommendation.reportId && recommendation.reportId._id) {
+            const fullReport = await HealthReport.findById(recommendation.reportId._id);
+            if (fullReport) {
+                recommendation.reportId.reportData = fullReport.reportData;
+            }
         }
 
         res.json({ recommendation });
@@ -133,38 +141,61 @@ export const rejectRecommendation = async (req, res) => {
 export const getDoctorDashboardStats = async (req, res) => {
     try {
         const doctorId = req.user.id;
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
 
         const stats = await Promise.all([
-            // Total recommendations assigned
-            Recommendation.countDocuments({ doctorId }),
+            // Pending reviews (unassigned)
+            Recommendation.countDocuments({ 
+                doctorId: null, 
+                reviewStatus: 'pending' 
+            }),
             
-            // Pending reviews
+            // Assigned to me
             Recommendation.countDocuments({ 
                 doctorId, 
                 reviewStatus: { $in: ['pending', 'under_review'] } 
             }),
             
-            // Approved this month
+            // Completed today
             Recommendation.countDocuments({ 
                 doctorId, 
-                reviewStatus: 'approved',
-                approvedAt: { 
-                    $gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1) 
-                }
+                reviewStatus: { $in: ['approved', 'rejected'] },
+                reviewedAt: { $gte: today }
             }),
             
-            // Total unassigned recommendations
+            // Total reviews
             Recommendation.countDocuments({ 
-                doctorId: null, 
-                reviewStatus: 'pending' 
+                doctorId,
+                reviewStatus: { $in: ['approved', 'rejected'] }
+            }),
+            
+            // Recent activity
+            Recommendation.find({ 
+                doctorId,
+                reviewedAt: { $exists: true }
             })
+            .populate('patientId', 'fullName')
+            .populate('reportId', 'reportType')
+            .sort({ reviewedAt: -1 })
+            .limit(5)
         ]);
+        
+        // Format recent activity
+        const recentActivity = stats[4].map(rec => {
+            const action = rec.reviewStatus === 'approved' ? 'Approved' : 'Rejected';
+            const patientName = rec.patientId?.fullName || 'Unknown Patient';
+            const reportType = rec.reportId?.reportType || 'Unknown';
+            const date = new Date(rec.reviewedAt).toLocaleDateString();
+            return `${action} ${reportType} report for ${patientName} on ${date}`;
+        });
 
         res.json({
-            totalAssigned: stats[0],
-            pendingReviews: stats[1],
-            approvedThisMonth: stats[2],
-            unassignedTotal: stats[3]
+            pendingReviews: stats[0],
+            assignedToMe: stats[1],
+            completedToday: stats[2],
+            totalReviews: stats[3],
+            recentActivity
         });
 
     } catch (error) {
@@ -216,7 +247,7 @@ export const getPendingRecommendations = async (req, res) => {
             doctorId: null, 
             reviewStatus: 'pending' 
         })
-        .populate('patientId', 'fullName')
+        .populate('patientId', 'fullName age bloodGroup')
         .populate('reportId', 'reportType')
         .sort({ createdAt: -1 });
 
@@ -233,11 +264,11 @@ export const getAssignedRecommendations = async (req, res) => {
         const doctorId = req.user.id;
         
         const recommendations = await Recommendation.find({ 
-            doctorId,
-            reviewStatus: { $in: ['pending', 'under_review'] }
+            doctorId
+            // No status filter - show all reports assigned to this doctor
         })
         .populate('patientId', 'fullName')
-        .populate('reportId', 'reportType')
+        .populate('reportId', 'reportType reportData')
         .sort({ assignedAt: -1 });
 
         res.json({ recommendations });

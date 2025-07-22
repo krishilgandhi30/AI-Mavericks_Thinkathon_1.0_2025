@@ -16,17 +16,22 @@ const recommendationSchema = new mongoose.Schema({
             }],
             procedures: [String],
             followUpTests: [String],
-            summary: String
+            summary: String,
+            emergencyWarnings: [String]
         },
         lifestyleChanges: {
             diet: [String],
             exercise: [String],
             habits: [String],
             precautions: [String],
+            supplements: [String],
             summary: String
         },
         riskFactors: [String],
-        urgencyLevel: { type: String, enum: ['low', 'medium', 'high'], default: 'medium' }
+        healthScore: { type: Number, min: 0, max: 100, default: 75 },
+        urgencyLevel: { type: String, enum: ['low', 'medium', 'high'], default: 'medium' },
+        nextAppointmentSuggestion: { type: String, enum: ['routine', 'follow-up', 'urgent'], default: 'routine' },
+        preventiveRecommendations: [String]
     },
     
     // Doctor Review Process

@@ -32,6 +32,22 @@ router.put('/profile', Authenticate, async (req, res) => {
         delete updateFields._id;
         delete updateFields.__v;
         
+        // Calculate age if dateOfBirth is provided and user is a patient
+        const user = await User.findById(req.user.id);
+        if (user.role === 'patient' && updateFields.dateOfBirth) {
+            const birthDate = new Date(updateFields.dateOfBirth);
+            const today = new Date();
+            let age = today.getFullYear() - birthDate.getFullYear();
+            const monthDiff = today.getMonth() - birthDate.getMonth();
+            
+            // Adjust age if birthday hasn't occurred yet this year
+            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+                age--;
+            }
+            
+            updateFields.age = age;
+        }
+        
         // Use native MongoDB driver to bypass Mongoose validation completely
         const result = await mongoose.connection.collection('users').updateOne(
             { _id: new mongoose.Types.ObjectId(req.user.id) },
@@ -43,11 +59,11 @@ router.put('/profile', Authenticate, async (req, res) => {
         }
         
         // Fetch the updated user
-        const user = await User.findById(req.user.id)
+        const updatedUser = await User.findById(req.user.id)
             .select('-password -resetPasswordToken -resetPasswordExpires');
 
 
-        res.json({ message: 'Profile updated successfully', user });
+        res.json({ message: 'Profile updated successfully', user: updatedUser });
     } catch (error) {
         console.error('Update profile error:', error);
         res.status(500).json({ message: 'Server error' });

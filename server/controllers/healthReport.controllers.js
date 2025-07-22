@@ -1,9 +1,23 @@
 import HealthReport from '../models/healthReport.models.js';
 import Recommendation from '../models/recommendation.model.js';
 import User from '../models/user.models.js';
+import AIHealthRecommendationService from '../services/aiRecommendationService.js';
 
-// AI Analysis Engine - Mock implementation
-const analyzeHealthReport = (reportData) => {
+// AI Analysis Engine - Enhanced implementation
+const analyzeHealthReport = async (reportData, patientProfile = {}) => {
+    // Use the enhanced AI service for comprehensive analysis
+    try {
+        const aiAnalysis = await AIHealthRecommendationService.generateHealthRecommendations(reportData, patientProfile);
+        return aiAnalysis;
+    } catch (error) {
+        console.error('Enhanced AI analysis failed, falling back to basic analysis:', error);
+        // Fallback to basic analysis
+        return performBasicAnalysis(reportData);
+    }
+};
+
+// Fallback basic analysis function
+const performBasicAnalysis = (reportData) => {
     const { bloodMetrics, urineMetrics, reportType } = reportData;
     
     // Mock AI analysis logic
@@ -102,6 +116,15 @@ export const uploadHealthReport = async (req, res) => {
         const { reportType, bloodMetrics, urineMetrics, patientNotes } = req.body;
         const patientId = req.user.id;
 
+        // Get patient profile for enhanced analysis
+        const patient = await User.findById(patientId);
+        const patientProfile = {
+            age: patient.dateOfBirth ? Math.floor((new Date() - new Date(patient.dateOfBirth)) / (365.25 * 24 * 60 * 60 * 1000)) : 35,
+            gender: patient.gender || 'unknown',
+            medicalHistory: patient.medicalHistory || [],
+            currentMedications: patient.currentMedications || []
+        };
+
         // Create health report
         const healthReport = new HealthReport({
             patientId,
@@ -114,14 +137,15 @@ export const uploadHealthReport = async (req, res) => {
 
         await healthReport.save();
 
-        // Generate AI recommendations
-        const aiAnalysis = analyzeHealthReport(healthReport);
+        // Generate enhanced AI recommendations
+        const aiAnalysis = await analyzeHealthReport(healthReport, patientProfile);
         
         const recommendation = new Recommendation({
             reportId: healthReport._id,
             patientId,
             aiSuggestions: aiAnalysis,
-            reviewStatus: 'pending'
+            reviewStatus: 'pending',
+            confidenceScore: aiAnalysis.confidenceScore || 0.8
         });
 
         await recommendation.save();
@@ -135,7 +159,9 @@ export const uploadHealthReport = async (req, res) => {
             message: 'Health report uploaded and analyzed successfully',
             reportId: healthReport._id,
             recommendationId: recommendation._id,
-            aiSuggestions: aiAnalysis
+            aiSuggestions: aiAnalysis,
+            healthScore: aiAnalysis.healthScore,
+            urgencyLevel: aiAnalysis.urgencyLevel
         });
 
     } catch (error) {
@@ -234,10 +260,42 @@ export const getDoctorRecommendations = async (req, res) => {
     }
 };
 
+// Get a specific health report by ID
+export const getReportById = async (req, res) => {
+    try {
+        const { reportId } = req.params;
+        
+        const report = await HealthReport.findById(reportId);
+        if (!report) {
+            return res.status(404).json({ message: 'Health report not found' });
+        }
+        
+        // Check if the user is authorized to view this report
+        // Allow access if the user is the patient or a doctor
+        if (req.user.role !== 'doctor' && report.patientId.toString() !== req.user.id) {
+            return res.status(403).json({ message: 'Not authorized to view this report' });
+        }
+        
+        // Get the recommendation for this report
+        const recommendation = await Recommendation.findOne({ reportId })
+            .populate('doctorId', 'fullName specialization');
+        
+        res.json({
+            report,
+            recommendation
+        });
+        
+    } catch (error) {
+        console.error('Error fetching health report:', error);
+        res.status(500).json({ message: 'Failed to fetch health report' });
+    }
+};
+
 export default {
     uploadHealthReport,
     getPatientReports,
     getPendingRecommendations,
     assignDoctor,
-    getDoctorRecommendations
+    getDoctorRecommendations,
+    getReportById
 };
