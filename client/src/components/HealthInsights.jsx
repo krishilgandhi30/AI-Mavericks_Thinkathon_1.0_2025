@@ -12,9 +12,12 @@ const HealthInsights = ({ reportId }) => {
     useEffect(() => {
         if (reportId) {
             fetchHealthInsights();
+            fetchReportDetails();
         }
         fetchPersonalizedRecommendations();
     }, [reportId]);
+    
+    const [reportDetails, setReportDetails] = useState(null);
 
     const fetchHealthInsights = async () => {
         try {
@@ -41,6 +44,19 @@ const HealthInsights = ({ reportId }) => {
             // Don't set error for personalized recommendations as it's optional
         } finally {
             setLoading(false);
+        }
+    };
+    
+    const fetchReportDetails = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await axios.get(`http://localhost:5000/api/health-reports/${reportId}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setReportDetails(response.data);
+        } catch (error) {
+            console.error('Error fetching report details:', error);
+            // Don't set error as this is supplementary information
         }
     };
 
@@ -145,6 +161,138 @@ const HealthInsights = ({ reportId }) => {
                                         </ul>
                                     </div>
                                 )}
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </div>
+        );
+    };
+
+    const renderDoctorRecommendations = () => {
+        if (!reportDetails || !reportDetails.recommendation) {
+            return (
+                <div className="doctor-recommendations empty">
+                    <div className="empty-state">
+                        <img src="/empty-state.svg" alt="No recommendations" style={{width: '120px', marginBottom: '1rem'}} />
+                        <p>No doctor recommendations available yet.</p>
+                        <p className="sub-text">A healthcare professional will review your report soon.</p>
+                    </div>
+                </div>
+            );
+        }
+
+        const { recommendation } = reportDetails;
+        const doctorApproved = recommendation.reviewStatus === 'approved';
+        
+        return (
+            <div className="doctor-recommendations">
+                <div className="doctor-header">
+                    <div className="doctor-info">
+                        <h3>{doctorApproved ? 'Doctor Approved Recommendations' : 'AI Generated Recommendations'}</h3>
+                        {doctorApproved && recommendation.doctorId && (
+                            <p className="reviewed-by">Reviewed by: Dr. {recommendation.doctorId.fullName} ({recommendation.doctorId.specialization})</p>
+                        )}
+                        {doctorApproved && recommendation.approvedAt && (
+                            <p className="review-date">Approved on: {new Date(recommendation.approvedAt).toLocaleDateString()}</p>
+                        )}
+                    </div>
+                    <div className="status-badge">
+                        <span className={`status ${recommendation.reviewStatus}`}>
+                            {recommendation.reviewStatus === 'approved' ? 'APPROVED' : 
+                             recommendation.reviewStatus === 'rejected' ? 'REJECTED' : 
+                             recommendation.reviewStatus === 'under_review' ? 'UNDER REVIEW' : 'PENDING'}
+                        </span>
+                    </div>
+                </div>
+
+                <div className="recommendations-content">
+                    {/* Treatment Plan */}
+                    {(doctorApproved ? recommendation.finalRecommendations?.treatmentPlan : recommendation.aiSuggestions?.treatmentPlan) && (
+                        <div className="recommendation-section treatment-plan">
+                            <h4>Treatment Plan</h4>
+                            <p className="summary">
+                                {doctorApproved 
+                                    ? recommendation.finalRecommendations?.treatmentPlan?.summary 
+                                    : recommendation.aiSuggestions?.treatmentPlan?.summary}
+                            </p>
+                            
+                            {/* Medications */}
+                            {(doctorApproved 
+                                ? recommendation.finalRecommendations?.treatmentPlan?.medications?.length > 0
+                                : recommendation.aiSuggestions?.treatmentPlan?.medications?.length > 0) && (
+                                <div className="medications">
+                                    <h5>Medications:</h5>
+                                    <ul className="medication-list">
+                                        {(doctorApproved 
+                                            ? recommendation.finalRecommendations?.treatmentPlan?.medications
+                                            : recommendation.aiSuggestions?.treatmentPlan?.medications).map((med, idx) => (
+                                            <li key={idx} className="medication-item">
+                                                {typeof med === 'string' ? med : (
+                                                    <>
+                                                        <strong>{med.name}</strong> - {med.dosage}, {med.frequency}
+                                                        {med.duration && <span> for {med.duration}</span>}
+                                                        {med.notes && <div className="med-notes">Note: {med.notes}</div>}
+                                                    </>
+                                                )}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {/* Lifestyle Changes */}
+                    {(doctorApproved ? recommendation.finalRecommendations?.lifestyleChanges : recommendation.aiSuggestions?.lifestyleChanges) && (
+                        <div className="recommendation-section lifestyle-changes">
+                            <h4>Lifestyle Changes</h4>
+                            <p className="summary">
+                                {doctorApproved 
+                                    ? recommendation.finalRecommendations?.lifestyleChanges?.summary 
+                                    : recommendation.aiSuggestions?.lifestyleChanges?.summary}
+                            </p>
+                            
+                            {/* Diet */}
+                            {(doctorApproved 
+                                ? recommendation.finalRecommendations?.lifestyleChanges?.diet?.length > 0
+                                : recommendation.aiSuggestions?.lifestyleChanges?.diet?.length > 0) && (
+                                <div className="diet">
+                                    <h5>Diet Recommendations:</h5>
+                                    <ul>
+                                        {(doctorApproved 
+                                            ? recommendation.finalRecommendations?.lifestyleChanges?.diet
+                                            : recommendation.aiSuggestions?.lifestyleChanges?.diet).map((item, idx) => (
+                                            <li key={idx}>{item}</li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            )}
+                            
+                            {/* Exercise */}
+                            {(doctorApproved 
+                                ? recommendation.finalRecommendations?.lifestyleChanges?.exercise?.length > 0
+                                : recommendation.aiSuggestions?.lifestyleChanges?.exercise?.length > 0) && (
+                                <div className="exercise">
+                                    <h5>Exercise Recommendations:</h5>
+                                    <ul>
+                                        {(doctorApproved 
+                                            ? recommendation.finalRecommendations?.lifestyleChanges?.exercise
+                                            : recommendation.aiSuggestions?.lifestyleChanges?.exercise).map((item, idx) => (
+                                            <li key={idx}>{item}</li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {/* Doctor Notes */}
+                    {doctorApproved && recommendation.doctorNotes && (
+                        <div className="recommendation-section doctor-notes">
+                            <h4>Doctor's Notes</h4>
+                            <div className="notes-content">
+                                {recommendation.doctorNotes}
                             </div>
                         </div>
                     )}
@@ -271,11 +419,18 @@ const HealthInsights = ({ reportId }) => {
                 >
                     Personalized Plan
                 </button>
+                <button 
+                    className={`tab-button ${activeTab === 'doctor' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('doctor')}
+                >
+                    Doctor's Recommendations
+                </button>
             </div>
 
             <div className="insights-content">
                 {activeTab === 'current' && renderCurrentInsights()}
                 {activeTab === 'personalized' && renderPersonalizedPlan()}
+                {activeTab === 'doctor' && renderDoctorRecommendations()}
             </div>
 
             {error && (

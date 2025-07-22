@@ -260,10 +260,42 @@ export const getDoctorRecommendations = async (req, res) => {
     }
 };
 
+// Get a specific health report by ID
+export const getReportById = async (req, res) => {
+    try {
+        const { reportId } = req.params;
+        
+        const report = await HealthReport.findById(reportId);
+        if (!report) {
+            return res.status(404).json({ message: 'Health report not found' });
+        }
+        
+        // Check if the user is authorized to view this report
+        // Allow access if the user is the patient or a doctor
+        if (req.user.role !== 'doctor' && report.patientId.toString() !== req.user.id) {
+            return res.status(403).json({ message: 'Not authorized to view this report' });
+        }
+        
+        // Get the recommendation for this report
+        const recommendation = await Recommendation.findOne({ reportId })
+            .populate('doctorId', 'fullName specialization');
+        
+        res.json({
+            report,
+            recommendation
+        });
+        
+    } catch (error) {
+        console.error('Error fetching health report:', error);
+        res.status(500).json({ message: 'Failed to fetch health report' });
+    }
+};
+
 export default {
     uploadHealthReport,
     getPatientReports,
     getPendingRecommendations,
     assignDoctor,
-    getDoctorRecommendations
+    getDoctorRecommendations,
+    getReportById
 };

@@ -416,6 +416,170 @@
   margin-top: 20px;
 }
 
+/* Doctor Recommendations Styles */
+.doctor-recommendations {
+  background: white;
+  border-radius: 15px;
+  padding: 30px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.doctor-recommendations.empty {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+}
+
+.doctor-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid #e9ecef;
+}
+
+.doctor-info h3 {
+  margin: 0 0 10px 0;
+  color: #2c3e50;
+  font-size: 1.5rem;
+}
+
+.reviewed-by, .review-date {
+  margin: 5px 0;
+  color: #6c757d;
+  font-size: 0.9rem;
+}
+
+.status-badge .status {
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.status.approved {
+  background: #28a745;
+  color: white;
+}
+
+.status.rejected {
+  background: #dc3545;
+  color: white;
+}
+
+.status.under_review, .status.pending {
+  background: #ffc107;
+  color: #212529;
+}
+
+.recommendations-content {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+.recommendation-section {
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 20px;
+  border-left: 4px solid #007bff;
+}
+
+.recommendation-section h4 {
+  margin: 0 0 15px 0;
+  color: #2c3e50;
+  font-size: 1.3rem;
+}
+
+.recommendation-section .summary {
+  margin-bottom: 20px;
+  color: #495057;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.treatment-plan {
+  border-left-color: #6f42c1;
+}
+
+.lifestyle-changes {
+  border-left-color: #fd7e14;
+}
+
+.doctor-notes {
+  border-left-color: #20c997;
+  background: linear-gradient(135deg, #f0fff4, #e6ffed);
+}
+
+.notes-content {
+  background: white;
+  padding: 15px;
+  border-radius: 8px;
+  color: #495057;
+  line-height: 1.6;
+}
+
+.medication-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.medication-item {
+  background: white;
+  padding: 12px;
+  border-radius: 8px;
+  border-left: 3px solid #6f42c1;
+}
+
+.med-notes {
+  margin-top: 5px;
+  font-size: 0.9rem;
+  color: #6c757d;
+  font-style: italic;
+}
+
+.diet h5, .exercise h5 {
+  margin: 15px 0 10px 0;
+  color: #495057;
+  font-size: 1.1rem;
+}
+
+.diet ul, .exercise ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.diet li, .exercise li {
+  background: white;
+  padding: 10px 15px;
+  margin-bottom: 8px;
+  border-radius: 6px;
+  border-left: 3px solid #fd7e14;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 30px;
+}
+
+.empty-state p {
+  margin: 10px 0;
+  color: #6c757d;
+}
+
+.empty-state .sub-text {
+  font-size: 0.9rem;
+  color: #adb5bd;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .health-insights {

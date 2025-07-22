@@ -12,7 +12,7 @@ class AIHealthRecommendationService {
     // Enhanced AI analysis with more sophisticated logic
     async generateHealthRecommendations(reportData, patientProfile = {}) {
         const { bloodMetrics, urineMetrics, reportType, patientNotes } = reportData;
-        const { age, gender, medicalHistory = [], currentMedications = [] } = patientProfile;
+        const { age, gender, bloodGroup, medicalHistory = [], currentMedications = [] } = patientProfile;
 
         const analysis = {
             treatmentPlan: {
@@ -221,7 +221,7 @@ class AIHealthRecommendationService {
     }
 
     generateLifestyleRecommendations(analysis, patientProfile) {
-        const { age } = patientProfile;
+        const { age, bloodGroup } = patientProfile;
 
         // Age-specific recommendations
         if (age > 50) {
@@ -234,6 +234,23 @@ class AIHealthRecommendationService {
             analysis.preventiveRecommendations.push('Annual cardiovascular screening');
             analysis.lifestyleChanges.diet.push('Anti-inflammatory foods: berries, leafy greens, fatty fish');
         }
+        
+        // Blood group specific recommendations
+        if (bloodGroup) {
+            if (bloodGroup.includes('A')) {
+                analysis.lifestyleChanges.diet.push('Type A: Focus on plant-based diet with limited red meat');
+                analysis.lifestyleChanges.exercise.push('Type A: Consider low-impact exercises like yoga and tai chi');
+            } else if (bloodGroup.includes('B')) {
+                analysis.lifestyleChanges.diet.push('Type B: Balance of meat and plants, avoid chicken and wheat');
+                analysis.lifestyleChanges.exercise.push('Type B: Moderate exercise like walking and swimming');
+            } else if (bloodGroup.includes('AB')) {
+                analysis.lifestyleChanges.diet.push('Type AB: Mixed diet with seafood, avoid caffeine and alcohol');
+                analysis.lifestyleChanges.exercise.push('Type AB: Calming exercise with moderate intensity');
+            } else if (bloodGroup.includes('O')) {
+                analysis.lifestyleChanges.diet.push('Type O: Higher protein diet with lean meats, limit grains');
+                analysis.lifestyleChanges.exercise.push('Type O: Regular intense physical exercise recommended');
+            }
+        }
 
         // General lifestyle recommendations
         analysis.lifestyleChanges.habits.push('7-9 hours of quality sleep per night');
@@ -243,7 +260,7 @@ class AIHealthRecommendationService {
     }
 
     generatePreventiveRecommendations(analysis, patientProfile) {
-        const { age, gender } = patientProfile;
+        const { age, gender, bloodGroup } = patientProfile;
 
         // Gender and age-specific screenings
         if (gender === 'female') {
@@ -263,6 +280,19 @@ class AIHealthRecommendationService {
             analysis.preventiveRecommendations.push('Colorectal cancer screening');
         }
 
+        // Blood group specific preventive recommendations
+        if (bloodGroup) {
+            if (bloodGroup.includes('A') || bloodGroup.includes('AB')) {
+                analysis.preventiveRecommendations.push('Regular monitoring of heart health due to higher risk of cardiovascular issues');
+            }
+            if (bloodGroup.includes('O')) {
+                analysis.preventiveRecommendations.push('Regular monitoring of stomach acidity and ulcer risk');
+            }
+            if (bloodGroup.includes('B')) {
+                analysis.preventiveRecommendations.push('Monitor for autoimmune conditions which may have higher prevalence');
+            }
+        }
+        
         // Universal recommendations
         analysis.preventiveRecommendations.push('Annual flu vaccination');
         analysis.preventiveRecommendations.push('Regular dental and eye examinations');
@@ -305,7 +335,7 @@ class AIHealthRecommendationService {
         /*
         try {
             const prompt = `Analyze this health report and provide medical recommendations:
-                Patient: ${patientProfile.age} year old ${patientProfile.gender}
+                Patient: ${patientProfile.age} year old ${patientProfile.gender}, Blood Group: ${patientProfile.bloodGroup}
                 Report Type: ${reportData.reportType}
                 Metrics: ${JSON.stringify(reportData.bloodMetrics || reportData.urineMetrics)}
                 Notes: ${reportData.patientNotes}
