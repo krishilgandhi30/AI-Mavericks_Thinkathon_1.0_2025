@@ -237,7 +237,7 @@ const DoctorDashboard = ({ userData }) => {
       const response = await axios.get(`http://localhost:5000/api/doctor-review/${recommendation._id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      
+
       // Always fetch the full report data for all recommendations, especially approved ones
       if (response.data.recommendation && response.data.recommendation.reportId) {
         try {
@@ -611,15 +611,14 @@ const DoctorDashboard = ({ userData }) => {
     // Always render a component structure to maintain consistent hook calls
     return (
       <div className="recommendation-details-container">
-        {/* Professional Navigation Header - Single Card Style */}
-        <div className="review-header-card">
+        <div className="review-content">
           <div className="review-navigation">
             <button className="back-button" onClick={() => setSelectedRecommendation(null)}>
               ← Back to My Assignments
             </button>
             <div className="review-title-section">
               <h2>Review AI Recommendation</h2>
-              <p className="review-subtitle">Patient: {selectedRecommendation?.patientId?.fullName || 'Loading...'}</p>
+              <p className="review-subtitle">Patient: {selectedRecommendation?.patientId?.fullName || "Loading..."}</p>
             </div>
           </div>
         </div>
@@ -673,54 +672,54 @@ const DoctorDashboard = ({ userData }) => {
                       Object.entries(selectedRecommendation.reportId.bloodMetrics).map(([key, value]) => (
                         value && typeof value === "object" && value.value ? (
                           <div className="metric-item" key={key}>
-                            <strong>{key}:</strong>
-                            <span>
-                              {value.value} {value.unit} {value.normalRange ? `(Normal Range: ${value.normalRange})` : ""}
-                            </span>
-                          </div>
-                        ) : null
-                      ))
-                    )}
+                                <strong>{key}:</strong>
+                                <span>
+                                  {value.value} {value.unit} {value.normalRange ? `(Normal Range: ${value.normalRange})` : ""}
+                                </span>
+                              </div>
+                            ) : null
+                          ))
+                          )}
                     {selectedRecommendation.reportId.reportType === "urine" && selectedRecommendation.reportId.urineMetrics && (
                       Object.entries(selectedRecommendation.reportId.urineMetrics).map(([key, value]) => (
                         value && typeof value === "object" && (value.value !== undefined) ? (
                           <div className="metric-item" key={key}>
-                            <strong>{key}:</strong>
-                            <span>
-                              {value.value} {value.normalRange ? `(Normal Range: ${value.normalRange})` : ""}
-                            </span>
-                          </div>
-                        ) : null
-                      ))
-                    )}
+                              <strong>{key}:</strong>
+                              <span>
+                                {value.value} {value.normalRange ? `(Normal Range: ${value.normalRange})` : ""}
+                              </span>
+                            </div>
+                          ) : null
+                        ))
+                        )}
                     {/* Fallback for reportData if available */}
                     {selectedRecommendation.reportId.reportData && Object.entries(selectedRecommendation.reportId.reportData).map(([key, value]) => (
-                      <div className="metric-item" key={key}>
-                        <strong>{key}:</strong>
-                        <span>
-                          {typeof value === "object"
-                            ? Array.isArray(value)
-                              ? value.join(", ")
-                              : Object.entries(value)
-                                  .map(([k, v]) => `${k}: ${v}`)
-                                  .join(", ")
-                            : value}
-                        </span>
-                      </div>
-                    ))}
-                    {/* Show metrics if no other data is available */}
-                    {selectedRecommendation.reportId.metrics && 
-                     !selectedRecommendation.reportId.bloodMetrics && 
-                     !selectedRecommendation.reportId.urineMetrics && 
-                     !selectedRecommendation.reportId.reportData && 
-                     Object.entries(selectedRecommendation.reportId.metrics).map(([key, value]) => (
-                      value !== undefined && value !== null ? (
                         <div className="metric-item" key={key}>
                           <strong>{key}:</strong>
-                          <span>{value}</span>
+                          <span>
+                            {typeof value === "object"
+                              ? Array.isArray(value)
+                                ? value.join(", ")
+                                : Object.entries(value)
+                                    .map(([k, v]) => `${k}: ${v}`)
+                                    .join(", ")
+                              : value}
+                          </span>
                         </div>
-                      ) : null
-                    ))}
+                      ))}
+                    {/* Show metrics if no other data is available */}
+                    {selectedRecommendation.reportId.metrics &&
+                      !selectedRecommendation.reportId.bloodMetrics &&
+                      !selectedRecommendation.reportId.urineMetrics &&
+                      !selectedRecommendation.reportId.reportData &&
+                      Object.entries(selectedRecommendation.reportId.metrics).map(([key, value]) => (
+                        value !== undefined && value !== null ? (
+                          <div className="metric-item" key={key}>
+                            <strong>{key}:</strong>
+                            <span>{value}</span>
+                          </div>
+                        ) : null
+                      ))}
                   </div>
                 ) : (
                   <p>No report data available</p>
@@ -807,7 +806,7 @@ const DoctorDashboard = ({ userData }) => {
                   />
                 </div>
 
-                <div className="review-actions">
+                <div className="review-actions" style={{ display: 'flex', gap: '15px', flexWrap: 'nowrap', justifyContent: 'space-between' }}>
                   {selectedRecommendation.reviewStatus === "approved" ? (
                     <div className="review-status-message approved">
                       <p>This recommendation was approved on {new Date(selectedRecommendation.approvedAt).toLocaleDateString()}</p>
@@ -823,17 +822,21 @@ const DoctorDashboard = ({ userData }) => {
                       </button>
                     </div>
                   ) : (
-                    <>
-                      <button className="btn-approve" onClick={approveRecommendation}>
+                    <div style={{ display: 'flex', width: '100%', gap: '15px', justifyContent: 'space-between' }}>
+                      <button className="btn-approve" onClick={approveRecommendation} style={{ flex: '1' }}>
                         Approve Recommendation
                       </button>
-                      <button className="btn-modify" onClick={requestModifications}>
+                      <button className="btn-modify" onClick={requestModifications} style={{ flex: '1' }}>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                        </svg>
                         Request Modifications
                       </button>
-                      <button className="btn-cancel" onClick={() => setSelectedRecommendation(null)}>
+                      <button className="btn-cancel" onClick={() => setSelectedRecommendation(null)} style={{ flex: '1' }}>
                         Cancel
                       </button>
-                    </>
+                    </div>
                   )}
                 </div>
               </div>
@@ -861,7 +864,7 @@ const DoctorDashboard = ({ userData }) => {
   return (
     <div className="doctor-dashboard">
       {/* Always render the navigation */}
-      <nav className="dashboard-nav" style={{ display: selectedRecommendation ? "none" : "flex" }}>
+      <nav className="dashboard-nav">
         <div className="nav-header">
           <span style={{ display: "flex", alignItems: "center", gap: "0.7rem" }}>
             <FaUserMd size={32} style={{ color: "#1a237e" }} />

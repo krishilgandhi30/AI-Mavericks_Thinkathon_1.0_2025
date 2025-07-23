@@ -1,8 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './HealthReportUpload.css';
 
 const HealthReportUpload = () => {
+    // Track animation state for form elements
+    const [animateMetric, setAnimateMetric] = useState(null);
+    const [formProgress, setFormProgress] = useState(0);
+    
+    // Helper function for health score color
+    const getHealthScoreColor = (score) => {
+        if (score >= 80) return '#27ae60';
+        if (score >= 60) return '#f39c12';
+        return '#e74c3c';
+    };
     const [reportData, setReportData] = useState({
         reportType: 'blood',
         patientNotes: '',
@@ -32,6 +42,10 @@ const HealthReportUpload = () => {
     const [analysisResult, setAnalysisResult] = useState(null);
 
     const handleInputChange = (category, metric, field, value) => {
+        // Animate the metric being changed
+        setAnimateMetric(metric);
+        setTimeout(() => setAnimateMetric(null), 800);
+        
         setReportData(prev => ({
             ...prev,
             [category]: {
@@ -42,6 +56,9 @@ const HealthReportUpload = () => {
                 }
             }
         }));
+        
+        // Update form progress
+        updateFormProgress();
     };
 
     const handleBasicChange = (field, value) => {
@@ -49,13 +66,93 @@ const HealthReportUpload = () => {
             ...prev,
             [field]: value
         }));
+        
+        // Update form progress
+        updateFormProgress();
     };
+    
+    // Calculate form completion progress
+    const updateFormProgress = () => {
+        let filledFields = 0;
+        let totalFields = 1; // Start with 1 for report type
+        
+        // Count filled notes
+        if (reportData.patientNotes.trim()) filledFields++;
+        totalFields++;
+        
+        // Count filled metrics
+        const metricsCategory = reportData.reportType === 'blood' ? 'bloodMetrics' : 'urineMetrics';
+        const metrics = reportData[metricsCategory];
+        
+        Object.values(metrics).forEach(metric => {
+            if (metric.value) filledFields++;
+            totalFields++;
+        });
+        
+        const progress = Math.round((filledFields / totalFields) * 100);
+        setFormProgress(progress);
+    };
+    
+    // Update progress when form data changes
+    useEffect(() => {
+        updateFormProgress();
+    }, [reportData]);
+    
+    // Add animation effects when component mounts
+    useEffect(() => {
+        const animateItems = () => {
+            const metricItems = document.querySelectorAll('.upload-metric-item');
+            metricItems.forEach((item, index) => {
+                setTimeout(() => {
+                    item.style.opacity = '1';
+                    item.style.transform = 'translateY(0)';
+                }, 100 * index);
+            });
+        };
+        
+        // Small delay to ensure DOM is ready
+        setTimeout(animateItems, 100);
+        
+        // Add hover effect to metric items
+        const addHoverEffects = () => {
+            const metricItems = document.querySelectorAll('.upload-metric-item');
+            metricItems.forEach(item => {
+                item.addEventListener('mouseenter', () => {
+                    const siblings = Array.from(item.parentNode.children).filter(child => child !== item);
+                    siblings.forEach(sibling => {
+                        sibling.style.opacity = '0.7';
+                    });
+                });
+                
+                item.addEventListener('mouseleave', () => {
+                    const siblings = Array.from(item.parentNode.children);
+                    siblings.forEach(sibling => {
+                        sibling.style.opacity = '1';
+                    });
+                });
+            });
+        };
+        
+        setTimeout(addHoverEffects, 500);
+        
+        return () => {
+            // Clean up event listeners
+            const metricItems = document.querySelectorAll('.upload-metric-item');
+            metricItems.forEach(item => {
+                item.removeEventListener('mouseenter', () => {});
+                item.removeEventListener('mouseleave', () => {});
+            });
+        };
+    }, [reportData.reportType]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
         setError('');
         setMessage('');
+        
+        // Scroll to top for better UX
+        window.scrollTo({ top: 0, behavior: 'smooth' });
 
         try {
             const token = localStorage.getItem('token');
@@ -74,6 +171,14 @@ const HealthReportUpload = () => {
 
             setMessage('Health report uploaded and analyzed successfully!');
             setAnalysisResult(response.data.aiSuggestions);
+            
+            // Scroll to results after a short delay
+            setTimeout(() => {
+                const resultElement = document.querySelector('.analysis-result');
+                if (resultElement) {
+                    resultElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }, 500);
             
             // Reset form
             setReportData({
@@ -97,10 +202,37 @@ const HealthReportUpload = () => {
         }
     };
 
+    // Helper function to check if value is within normal range
+    const isValueNormal = (value, normalRange) => {
+        if (!value || !normalRange) return true;
+        
+        const numValue = parseFloat(value);
+        
+        if (normalRange.includes('-')) {
+            const [min, max] = normalRange.split('-').map(v => parseFloat(v));
+            return numValue >= min && numValue <= max;
+        } else if (normalRange.includes('<')) {
+            const max = parseFloat(normalRange.replace(/[^0-9.]/g, ''));
+            return numValue < max;
+        } else if (normalRange.includes('>')) {
+            const min = parseFloat(normalRange.replace(/[^0-9.]/g, ''));
+            return numValue > min;
+        }
+        
+        return true;
+    };
+    
     const renderBloodMetrics = () => (
         <div className="metrics-grid">
             {Object.entries(reportData.bloodMetrics).map(([key, metric]) => (
-                <div key={key} className="metric-item">
+                <div 
+                    key={key} 
+                    className={`upload-metric-item ${animateMetric === key ? 'animate-pulse' : ''}`}
+                    style={{
+                        animation: animateMetric === key ? 'pulse 0.8s ease-in-out' : 'none',
+                        borderLeftColor: metric.value ? (isValueNormal(metric.value, metric.normalRange) ? '#27ae60' : '#e74c3c') : '#3498db'
+                    }}
+                >
                     <label className="metric-label">
                         {key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1')}
                     </label>
@@ -116,15 +248,45 @@ const HealthReportUpload = () => {
                         <span className="metric-unit">{metric.unit}</span>
                     </div>
                     <span className="normal-range">Normal: {metric.normalRange}</span>
+                    {metric.value && (
+                        <div className="metric-status" style={{ 
+                            color: isValueNormal(metric.value, metric.normalRange) ? '#27ae60' : '#e74c3c' 
+                        }}>
+                            {isValueNormal(metric.value, metric.normalRange) ? '✓ Normal' : '⚠️ Out of range'}
+                        </div>
+                    )}
                 </div>
             ))}
         </div>
     );
 
+    // Helper function to check if urine value is normal
+    const isUrineValueNormal = (key, value, normalRange) => {
+        if (!value) return true;
+        
+        if (key === 'specificGravity') {
+            const numValue = parseFloat(value);
+            return numValue >= 1.005 && numValue <= 1.030;
+        } else if (key === 'ph') {
+            const numValue = parseFloat(value);
+            return numValue >= 4.6 && numValue <= 8.0;
+        } else {
+            // For protein, glucose, ketones - normal is "Negative"
+            return value === 'Negative';
+        }
+    };
+    
     const renderUrineMetrics = () => (
         <div className="metrics-grid">
             {Object.entries(reportData.urineMetrics).map(([key, metric]) => (
-                <div key={key} className="metric-item">
+                <div 
+                    key={key} 
+                    className={`upload-metric-item ${animateMetric === key ? 'animate-pulse' : ''}`}
+                    style={{
+                        animation: animateMetric === key ? 'pulse 0.8s ease-in-out' : 'none',
+                        borderLeftColor: metric.value ? (isUrineValueNormal(key, metric.value, metric.normalRange) ? '#27ae60' : '#e74c3c') : '#3498db'
+                    }}
+                >
                     <label className="metric-label">
                         {key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1')}
                     </label>
@@ -155,6 +317,13 @@ const HealthReportUpload = () => {
                         )}
                     </div>
                     <span className="normal-range">Normal: {metric.normalRange}</span>
+                    {metric.value && (
+                        <div className="metric-status" style={{ 
+                            color: isUrineValueNormal(key, metric.value, metric.normalRange) ? '#27ae60' : '#e74c3c' 
+                        }}>
+                            {isUrineValueNormal(key, metric.value, metric.normalRange) ? '✓ Normal' : '⚠️ Abnormal'}
+                        </div>
+                    )}
                 </div>
             ))}
         </div>
@@ -189,6 +358,11 @@ const HealthReportUpload = () => {
             )}
 
             <form onSubmit={handleSubmit} className="upload-form">
+                <div className="form-progress-container">
+                    <div className="form-progress-bar" style={{ width: `${formProgress}%` }}></div>
+                    <span className="form-progress-text">{formProgress}% Complete</span>
+                </div>
+                
                 <div className="form-group">
                     <label className="form-label">Report Type</label>
                     <div className="report-type-selector">
@@ -239,24 +413,46 @@ const HealthReportUpload = () => {
                     />
                 </div>
 
-                <button type="submit" className="submit-btn" disabled={loading}>
+                <button 
+                    type="submit" 
+                    className="submit-btn" 
+                    disabled={loading || formProgress < 30}
+                    title={formProgress < 30 ? "Please fill in more fields" : ""}
+                >
                     {loading ? (
                         <>
                             <div className="spinner"></div>
-                            Analyzing...
+                            <span>Analyzing your health data...</span>
                         </>
                     ) : (
-                        'Upload & Analyze'
+                        <>
+                            <span className="btn-icon">🚀</span>
+                            <span>Upload & Get AI Analysis</span>
+                        </>
                     )}
                 </button>
+                
+                {formProgress < 30 && !loading && (
+                    <div className="form-hint">
+                        Please fill in more fields to enable submission
+                    </div>
+                )}
             </form>
 
             {analysisResult && (
                 <div className="analysis-result">
                     <div className="analysis-header">
-                        <h3>🤖 AI Analysis Complete</h3>
+                        <h3>
+                            <span className="ai-icon">🤖</span>
+                            AI Analysis Complete
+                        </h3>
                         <div className="health-score">
-                            <div className="score-circle">
+                            <div 
+                                className="score-circle"
+                                style={{
+                                    background: `conic-gradient(${getHealthScoreColor(analysisResult.healthScore || 75)} ${(analysisResult.healthScore || 75) * 3.6}deg, #e0e0e0 0deg)`
+                                }}
+                            >
                                 <span className="score-number">{analysisResult.healthScore || 75}</span>
                                 <span className="score-label">Health Score</span>
                             </div>

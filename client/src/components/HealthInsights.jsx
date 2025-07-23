@@ -299,24 +299,8 @@ const HealthInsights = ({ reportId, onBack }) => {
                 </div>
             </div>
 
-            <div className="insights-tabs">
-                <button 
-                    className={`tab-button ${activeTab === 'current' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('current')}
-                >
-                    Current Report
-                </button>
-                <button 
-                    className={`tab-button ${activeTab === 'doctor' ? 'active' : ''}`}
-                    onClick={() => setActiveTab('doctor')}
-                >
-                    Doctor's Recommendations
-                </button>
-            </div>
-
             <div className="insights-content">
                 {activeTab === 'current' && renderCurrentInsights()}
-                {activeTab === 'doctor' && renderDoctorRecommendations()}
             </div>
 
             {error && (
