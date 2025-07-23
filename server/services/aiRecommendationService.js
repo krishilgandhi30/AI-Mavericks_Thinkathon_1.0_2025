@@ -3,8 +3,10 @@ import OpenAI from "openai";
 class AIHealthRecommendationService {
   constructor() {
     // Initialize OpenAI with API key from environment variables
+    const apiKey = process.env.OPENAI_API_KEY || 'your-api-key-here';
+    console.log(`Initializing OpenAI with API key: ${apiKey.substring(0, 5)}...${apiKey.substring(apiKey.length - 4)}`);
     this.openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY || 'your-api-key-here'
+      apiKey: apiKey
     });
   }
 
@@ -369,13 +371,15 @@ class AIHealthRecommendationService {
           "preventiveRecommendations": ["..."]
         }`;
 
+      console.log('Calling OpenAI API for health insights...');
       // Call OpenAI API
       const response = await this.openai.chat.completions.create({
-        model: "gpt-4o-mini", // "gpt-3.5-turbo"
+        model: "gpt-3.5-turbo", // Using a more widely available model
         messages: [{ role: "user", content: prompt }],
         temperature: 0.3,
         max_tokens: 2000
       });
+      console.log('OpenAI API response received for health insights');
 
       // Parse the response
       const aiResponse = response.choices[0].message.content;

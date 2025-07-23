@@ -149,7 +149,6 @@ function SignUp() {
 				})
 			});
 
-			console.log("User created!", response.data);
 			setMessage("Account created successfully! Redirecting to login...");
 			setTimeout(() => {
 				navigate("/login");

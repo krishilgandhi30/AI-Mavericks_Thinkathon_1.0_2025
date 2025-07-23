@@ -84,7 +84,6 @@ const DoctorDashboard = ({ userData }) => {
       const response = await axios.get("http://localhost:5000/api/users/profile", {
         headers: { Authorization: `Bearer ${token}` },
       });
-      console.log("Response from user data fetch:", response);
 
       setUser(response.data.user || response.data);
     } catch (error) {

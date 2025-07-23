@@ -17,8 +17,6 @@ import aiRecommendationsRoutes from './routes/aiRecommendations.routes.js';
 const app = express();
 
 // Connect to MongoDB
-console.log("Connecting to MongoDB...", process.env.MONGO_URI);
-
 mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/healthcare-ai')
   .then(() => console.log('MongoDB Connected'))
   .catch(err => {

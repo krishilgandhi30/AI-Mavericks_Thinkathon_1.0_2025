@@ -103,7 +103,6 @@ const PatientDashboard = ({ userData }) => {
       const response = await axios.get("http://localhost:5000/api/users/profile", {
         headers: { Authorization: `Bearer ${token}` },
       });
-      console.log("User data fetched:", response.data);
       setUser(response.data);
       setLoading(false);
     } catch (error) {
@@ -113,7 +112,6 @@ const PatientDashboard = ({ userData }) => {
         navigate("/login");
       } else {
         // Demo user data for development
-        console.log("Using demo data");
         setUser({
           _id: "demo-patient",
           fullName: "John Doe",
@@ -136,12 +134,10 @@ const PatientDashboard = ({ userData }) => {
       const response = await axios.get("http://localhost:5000/api/health-reports/patient/reports", {
         headers: { Authorization: `Bearer ${token}` },
       });
-      console.log("Health reports fetched:", response.data);
       setHealthReports(response.data.reports || []);
     } catch (error) {
       console.error("Error fetching health reports:", error);
       // Demo data for development
-      console.log("Using demo health reports");
       setHealthReports([
         {
           _id: "report1",
@@ -195,7 +191,7 @@ const PatientDashboard = ({ userData }) => {
           aiInsights: insightsResponse.data.insights
         }));
       } catch (insightsError) {
-        console.log("AI insights not available for this report:", insightsError);
+        console.error("AI insights not available for this report:", insightsError);
       }
 
     } catch (error) {
