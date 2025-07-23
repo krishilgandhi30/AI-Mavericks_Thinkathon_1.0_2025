@@ -681,7 +681,8 @@
 .btn-save,
 .btn-approve,
 .btn-reject,
-.btn-modify {
+.btn-modify,
+.btn-update-ai {
   padding: 12px 25px;
   border: none;
   border-radius: 8px;
@@ -719,7 +720,20 @@
   box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
 }
 
-.btn-modify::before {
+.btn-update-ai {
+  background: linear-gradient(135deg, #6200ea, #3700b3);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(98, 0, 234, 0.3);
+}
+
+.btn-modify::before,
+.btn-update-ai::before {
   content: '';
   position: absolute;
   top: 0;
@@ -730,14 +744,16 @@
   transition: left 0.7s ease;
 }
 
-.btn-modify:hover::before {
+.btn-modify:hover::before,
+.btn-update-ai:hover::before {
   left: 100%;
 }
 
 .btn-save:hover,
 .btn-approve:hover,
 .btn-reject:hover,
-.btn-modify:hover {
+.btn-modify:hover,
+.btn-update-ai:hover {
   transform: translateY(-2px);
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
 }
@@ -748,6 +764,7 @@
   border-radius: 8px;
   text-align: center;
   margin-bottom: 15px;
+  width: 100%;
 }
 
 .review-status-message.approved {

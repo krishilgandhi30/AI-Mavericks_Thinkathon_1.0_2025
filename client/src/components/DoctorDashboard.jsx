@@ -316,31 +316,41 @@ const DoctorDashboard = ({ userData }) => {
       alert("Error approving recommendation");
     }
   };
-
-  const requestModifications = async () => {
+  
+  const updateAIRecommendations = async () => {
     try {
+      if (!reviewData.doctorFeedbackToAI) {
+        alert("Please provide feedback to the AI system before requesting an update.");
+        return;
+      }
+      
       const token = localStorage.getItem("token");
       if (!token) return;
-
+      
+      setLoading(true);
+      
       await axios.post(
-        `http://localhost:5000/api/doctor-review/${selectedRecommendation._id}/request-modifications`,
+        `http://localhost:5000/api/doctor-review/${selectedRecommendation._id}/update-ai`,
         {
-          feedbackToAI: reviewData.doctorFeedbackToAI,
-          requestedChanges: reviewData.modifications,
+          doctorFeedbackToAI: reviewData.doctorFeedbackToAI
         },
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-
-      alert("Modification request sent successfully!");
-      setSelectedRecommendation(null);
-      // Refresh all relevant data
+      
+      alert("AI recommendations updated successfully based on your feedback!");
+      
+      // Refresh the recommendation details to show updated AI insights
+      await openRecommendationDetails({ _id: selectedRecommendation._id });
+      
+      // Refresh dashboard stats
       fetchDashboardStats();
-      if (activeTab === "assigned") fetchAssignedRecommendations();
     } catch (error) {
-      console.error("Error requesting modifications:", error);
-      alert("Error requesting modifications");
+      console.error("Error updating AI recommendations:", error);
+      alert("Error updating AI recommendations. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -434,6 +444,9 @@ const DoctorDashboard = ({ userData }) => {
                 </p>
                 <p>
                   <strong>Created:</strong> {new Date(rec.createdAt).toLocaleDateString()}
+                </p>
+                                <p>
+                  <strong>Approved:</strong> {new Date(rec?.reviewedAt)?.toLocaleDateString() || "-"}
                 </p>
                 {rec.aiSuggestions?.riskFactors?.length > 0 && (
                   <p>
@@ -640,9 +653,9 @@ const DoctorDashboard = ({ userData }) => {
                   </div>
                   <div className="info-item">
                     <strong>Gender:</strong> {selectedRecommendation.patientId?.gender || "N/A"}
-                  </div>
+                  </div>                  
                   <div className="info-item">
-                    <strong>Age:</strong> {selectedRecommendation.patientId?.age || "N/A"}
+                    <strong>Age:</strong> {selectedRecommendation.patientId?.dateOfBirth ? Math.floor((new Date() - new Date(selectedRecommendation.patientId.dateOfBirth)) / (365.25 * 24 * 60 * 60 * 1000))  : "N/A"}
                   </div>
                   <div className="info-item">
                     <strong>Blood Group:</strong> {selectedRecommendation.patientId?.bloodGroup || "N/A"}
@@ -822,16 +835,18 @@ const DoctorDashboard = ({ userData }) => {
                       </button>
                     </div>
                   ) : (
-                    <div style={{ display: 'flex', width: '100%', gap: '15px', justifyContent: 'space-between' }}>
+                    <div style={{ display: 'flex', width: '100%', gap: '15px', justifyContent: 'space-between', flexWrap: 'wrap' }}>
                       <button className="btn-approve" onClick={approveRecommendation} style={{ flex: '1' }}>
                         Approve Recommendation
                       </button>
-                      <button className="btn-modify" onClick={requestModifications} style={{ flex: '1' }}>
+                      <button className="btn-update-ai" onClick={updateAIRecommendations} style={{ flex: '1', backgroundColor: '#6200ea', color: 'white', border: 'none', borderRadius: '4px', padding: '10px', cursor: 'pointer' }}>
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                          <path d="M21 2v6h-6"></path>
+                          <path d="M3 12a9 9 0 0 1 15-6.7L21 8"></path>
+                          <path d="M3 12a9 9 0 0 0 15 6.7L21 16"></path>
+                          <path d="M21 22v-6h-6"></path>
                         </svg>
-                        Request Modifications
+                        Update AI Report
                       </button>
                       <button className="btn-cancel" onClick={() => setSelectedRecommendation(null)} style={{ flex: '1' }}>
                         Cancel

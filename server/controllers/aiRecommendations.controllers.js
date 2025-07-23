@@ -1,4 +1,3 @@
-import AIHealthRecommendationService from '../services/aiRecommendationService.js';
 import HealthReport from '../models/healthReport.models.js';
 import Recommendation from '../models/recommendation.model.js';
 import User from '../models/user.models.js';
@@ -10,8 +9,8 @@ export const getHealthInsights = async (req, res) => {
         const userId = req.user.id;
 
         // Find the health report
-        const healthReport = await HealthReport.findOne({
-            _id: reportId,
+        const healthReport = await Recommendation.findOne({
+            reportId,
             patientId: userId
         });
 
@@ -22,22 +21,16 @@ export const getHealthInsights = async (req, res) => {
         // Get user profile for enhanced analysis
         const user = await User.findById(userId);
         const patientProfile = {
-            age: user.dateOfBirth ? Math.floor((new Date() - new Date(user.dateOfBirth)) / (365.25 * 24 * 60 * 60 * 1000)) : 35,
+            age: user.dateOfBirth ? Math.floor((new Date() - new Date(user.dateOfBirth)) / (365.25 * 24 * 60 * 60 * 1000)) : 30,
             gender: user.gender || 'unknown',
             medicalHistory: user.medicalHistory || [],
             currentMedications: user.currentMedications || []
         };
 
-        // Generate fresh AI analysis
-        const aiInsights = await AIHealthRecommendationService.generateHealthRecommendations(
-            healthReport,
-            patientProfile
-        );
-
         res.json({
             message: 'Health insights generated successfully',
             reportId: healthReport._id,
-            insights: aiInsights,
+            insights: healthReport?.finalRecommendations,
             patientProfile: {
                 age: patientProfile.age,
                 gender: patientProfile.gender

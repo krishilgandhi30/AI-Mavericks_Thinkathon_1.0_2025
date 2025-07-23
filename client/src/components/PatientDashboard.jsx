@@ -531,7 +531,7 @@ const PatientDashboard = ({ userData }) => {
               </li>
               <li>
                 <strong>Age</strong>
-                <span>{user.age || "Not calculated"}</span>
+                <span>{user?.dateOfBirth ? Math.floor((new Date() - new Date(user.dateOfBirth)) / (365.25 * 24 * 60 * 60 * 1000))  : "Not specified"}</span>
               </li>
               <li>
                 <strong>Blood Group</strong>
@@ -620,7 +620,7 @@ const PatientDashboard = ({ userData }) => {
               {reportDetails.recommendation?.doctorId && (
                 <div className="info-item">
                   <label>Reviewed by:</label>
-                  <span>{reportDetails.recommendation.doctorId.fullName}</span>
+                  <span>Dr. {reportDetails.recommendation.doctorId.fullName}</span>
                 </div>
               )}
             </div>
