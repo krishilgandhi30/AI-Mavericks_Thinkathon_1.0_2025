@@ -73,7 +73,7 @@ function ForgotPassword() {
 						</div>
 						<h1 className="forgot-password-title">Forgot Password?</h1>
 						<p className="forgot-password-subtitle">
-							No worries! Enter your email address and we'll send you a link to reset your password.
+							No worries! Enter your email address to reset your password.
 						</p>
 					</div>
 
@@ -103,7 +103,6 @@ function ForgotPassword() {
 					{/* Reset Link Info */}
 					{resetLink && (
 						<div className="alert alert-info">
-							<p>For development purposes, you can directly reset your password:</p>
 							<button 
 								onClick={() => navigate(`/resetpassword/${token}`)}
 								className="btn-secondary"
@@ -157,7 +156,7 @@ function ForgotPassword() {
 								</>
 							) : (
 								<>
-									<span>Send Reset Link</span>
+									<span>Generate Reset Password Link</span>
 									<svg width="20" height="20" viewBox="0 0 24 24" fill="none">
 										<path d="M5 12H19" stroke="currentColor" strokeWidth="2"/>
 										<path d="M12 5L19 12L12 19" stroke="currentColor" strokeWidth="2"/>

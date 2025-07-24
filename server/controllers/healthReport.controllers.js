@@ -12,102 +12,8 @@ const analyzeHealthReport = async (reportData, patientProfile = {}) => {
     } catch (error) {
         console.error('Enhanced AI analysis failed, falling back to basic analysis:', error);
         // Fallback to basic analysis
-        return performBasicAnalysis(reportData);
+        return AIHealthRecommendationService.generateHealthRecommendations(reportData, patientProfile);
     }
-};
-
-// Fallback basic analysis function
-const performBasicAnalysis = (reportData) => {
-    const { bloodMetrics, urineMetrics, reportType } = reportData;
-    
-    // Mock AI analysis logic
-    const analysis = {
-        treatmentPlan: {
-            medications: [],
-            procedures: [],
-            followUpTests: [],
-            summary: ''
-        },
-        lifestyleChanges: {
-            diet: [],
-            exercise: [],
-            habits: [],
-            precautions: [],
-            summary: ''
-        },
-        riskFactors: [],
-        urgencyLevel: 'medium'
-    };
-
-    // Blood test analysis
-    if (reportType === 'blood' && bloodMetrics) {
-        // Glucose analysis
-        if (bloodMetrics.glucose?.value) {
-            if (bloodMetrics.glucose.value > 126) {
-                analysis.riskFactors.push('Elevated glucose levels - possible diabetes');
-                analysis.treatmentPlan.medications.push({
-                    name: 'Metformin',
-                    dosage: '500mg',
-                    frequency: 'Twice daily',
-                    duration: '3 months',
-                    notes: 'Monitor blood glucose levels'
-                });
-                analysis.treatmentPlan.followUpTests.push('HbA1c test in 3 months');
-                analysis.lifestyleChanges.diet.push('Reduce sugar and refined carbohydrates');
-                analysis.lifestyleChanges.exercise.push('30 minutes moderate exercise daily');
-                analysis.urgencyLevel = 'high';
-            } else if (bloodMetrics.glucose.value > 100) {
-                analysis.riskFactors.push('Pre-diabetic glucose levels');
-                analysis.lifestyleChanges.diet.push('Low glycemic index diet');
-                analysis.lifestyleChanges.exercise.push('Regular cardio exercise');
-                analysis.urgencyLevel = 'medium';
-            }
-        }
-
-        // Cholesterol analysis
-        if (bloodMetrics.cholesterol?.value) {
-            if (bloodMetrics.cholesterol.value > 240) {
-                analysis.riskFactors.push('High cholesterol levels');
-                analysis.treatmentPlan.medications.push({
-                    name: 'Atorvastatin',
-                    dosage: '20mg',
-                    frequency: 'Once daily',
-                    duration: '6 months',
-                    notes: 'Take with evening meal'
-                });
-                analysis.lifestyleChanges.diet.push('Low saturated fat diet');
-                analysis.lifestyleChanges.exercise.push('Aerobic exercise 150 min/week');
-            } else if (bloodMetrics.cholesterol.value > 200) {
-                analysis.lifestyleChanges.diet.push('Heart-healthy diet with omega-3 fatty acids');
-                analysis.lifestyleChanges.exercise.push('Regular physical activity');
-            }
-        }
-
-        // Hemoglobin analysis
-        if (bloodMetrics.hemoglobin?.value) {
-            if (bloodMetrics.hemoglobin.value < 12) {
-                analysis.riskFactors.push('Low hemoglobin - possible anemia');
-                analysis.treatmentPlan.medications.push({
-                    name: 'Iron supplement',
-                    dosage: '65mg elemental iron',
-                    frequency: 'Once daily',
-                    duration: '3 months',
-                    notes: 'Take with vitamin C for better absorption'
-                });
-                analysis.lifestyleChanges.diet.push('Iron-rich foods (spinach, red meat, lentils)');
-                analysis.treatmentPlan.followUpTests.push('Complete blood count in 6 weeks');
-            }
-        }
-    }
-
-    // Generate summaries
-    analysis.treatmentPlan.summary = analysis.treatmentPlan.medications.length > 0 
-        ? `Treatment plan includes ${analysis.treatmentPlan.medications.length} medication(s) and ${analysis.treatmentPlan.followUpTests.length} follow-up test(s).`
-        : 'No specific medications required at this time.';
-    
-    analysis.lifestyleChanges.summary = 'Lifestyle modifications recommended for optimal health.';
-
-    return analysis;
 };
 
 // Upload and analyze health report
@@ -137,15 +43,12 @@ export const uploadHealthReport = async (req, res) => {
 
         await healthReport.save();
 
-        // Generate enhanced AI recommendations
-        const aiAnalysis = await analyzeHealthReport(healthReport, patientProfile);
-        
+        // Create recommendation without AI analysis initially
         const recommendation = new Recommendation({
             reportId: healthReport._id,
             patientId,
-            aiSuggestions: aiAnalysis,
             reviewStatus: 'pending',
-            confidenceScore: aiAnalysis.confidenceScore || 0.8
+            confidenceScore: 0.8
         });
 
         await recommendation.save();
@@ -156,12 +59,10 @@ export const uploadHealthReport = async (req, res) => {
         await healthReport.save();
 
         res.status(201).json({
-            message: 'Health report uploaded and analyzed successfully',
+            message: 'Health report uploaded successfully. Doctor will be assigned shortly.',
             reportId: healthReport._id,
             recommendationId: recommendation._id,
-            aiSuggestions: aiAnalysis,
-            healthScore: aiAnalysis.healthScore,
-            urgencyLevel: aiAnalysis.urgencyLevel
+            status: 'pending'
         });
 
     } catch (error) {
@@ -230,8 +131,23 @@ export const assignDoctor = async (req, res) => {
             return res.status(404).json({ message: 'Recommendation not found' });
         }
 
+        // Generate AI analysis when doctor is assigned
+        const healthReport = await HealthReport.findById(recommendation.reportId);
+        const patient = await User.findById(recommendation.patientId);
+        
+        const patientProfile = {
+            age: patient.dateOfBirth ? Math.floor((new Date() - new Date(patient.dateOfBirth)) / (365.25 * 24 * 60 * 60 * 1000)) : 35,
+            gender: patient.gender || 'unknown',
+            bloodGroup: patient.bloodGroup,
+            medicalHistory: patient.medicalHistory || [],
+            currentMedications: patient.currentMedications || []
+        };
+
+        const aiAnalysis = await analyzeHealthReport(healthReport, patientProfile);
+        
         recommendation.doctorId = doctorId;
         recommendation.reviewStatus = 'under_review';
+        recommendation.aiSuggestions = aiAnalysis;
         await recommendation.save();
 
         res.json({ message: 'Doctor assigned successfully' });
