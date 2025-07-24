@@ -81,7 +81,6 @@ ai-mavericks-thinkathon/
 - **OpenAI API** - AI-powered health analysis
 - **JWT** - JSON Web Token authentication
 - **bcryptjs** - Password hashing
-- **Multer** - File upload handling
 - **CORS** - Cross-origin resource sharing
 
 ### Development Tools
@@ -290,24 +289,6 @@ The application integrates with OpenAI's GPT models to provide:
 - Add comprehensive comments
 - Maintain consistent naming conventions
 
-## 🔧 Environment Configuration
-
-### Development Environment
-```env
-NODE_ENV=development
-MONGO_URI=mongodb://localhost:27017/healthcare-ai-dev
-JWT_SECRET=dev-secret-key
-OPENAI_API_KEY=your-dev-openai-key
-```
-
-### Production Environment
-```env
-NODE_ENV=production
-MONGO_URI=your-production-mongodb-uri
-JWT_SECRET=your-production-secret-key
-OPENAI_API_KEY=your-production-openai-key
-```
-
 ## 📱 Responsive Design
 
 The application is fully responsive and works on:
@@ -334,34 +315,12 @@ npm start
 - **DigitalOcean** - Full-stack deployment on droplets
 - **AWS** - Scalable cloud deployment
 
-## 🧪 Testing
-
-### Running Tests
-```bash
-# Frontend tests
-cd client
-npm test
-
-# Backend tests
-cd server
-npm test
-```
-
 ## 📈 Performance Optimization
 
 - **Code Splitting** - Lazy loading of components
 - **Image Optimization** - Compressed images and lazy loading
 - **API Caching** - Intelligent caching strategies
 - **Database Indexing** - Optimized MongoDB queries
-- **CDN Integration** - Fast asset delivery
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
 
 ## 📄 License
 
@@ -369,15 +328,13 @@ This project is licensed under the ISC License - see the [LICENSE](LICENSE) file
 
 ## 👥 Team
 
-- **Himanshu** - Backend Developer & AI Integration
-- **Team Members** - Frontend Development & UI/UX Design
+- **Krishil Gandhi** - Frontend Development, UI/UX Design, Backend Developer & AI Integration
 
 ## 📞 Support
 
 For support and questions:
-- **Email**: support@healthcare-ai.com
+- **Email**: krishil.gandhi@acldigital.com
 - **Documentation**: [Project Wiki](wiki-link)
-- **Issues**: [GitHub Issues](issues-link)
 
 ## 🔮 Future Enhancements
 

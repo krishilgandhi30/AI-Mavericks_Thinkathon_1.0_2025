@@ -105,8 +105,8 @@ function Login() {
 						<div className="login-icon">
 							<img src={logo} alt="Portal Icon" className="login-icon" />
 						</div>
-						<h1 className="login-title">Welcome Back!</h1>
-						<p className="login-subtitle">Sign in to Doctor AI Portal.</p>
+						<h1 className="login-title">HealthCare AI - Portal</h1>
+						<p className="login-subtitle">Sign in to HealthCare AI - Portal.</p>
 					</div>
 
 					{/* Error Message */}

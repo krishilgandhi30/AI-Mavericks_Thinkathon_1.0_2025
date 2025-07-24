@@ -321,7 +321,12 @@ const PatientDashboard = ({ userData }) => {
                     <span className={`report-type-badge ${report.reportType === "blood" ? "blood-type" : report.reportType === "urine" ? "urine-type" : ""}`}>{report.reportType?.toUpperCase()}</span>
                     <span className="report-date">{new Date(report.createdAt).toLocaleDateString()}</span>
                   </div>
-                  <span className={`status-badge ${getStatusBadge(report.recommendation?.reviewStatus)}`}>{report.recommendation?.reviewStatus?.replace("_", " ").toUpperCase() || "PENDING"}</span>
+                  <span className={`status-badge ${getStatusBadge(report.recommendation?.reviewStatus)}`}>
+                    {!report.recommendation?.reviewStatus ? "PENDING" :
+                     report.recommendation.reviewStatus === "pending" ? "DOCTOR WILL BE ASSIGNED SHORTLY" :
+                     report.recommendation.reviewStatus === "under_review" ? `UNDER REVIEW BY ${report.recommendation.doctorId?.fullName || 'DOCTOR'}` :
+                     report.recommendation.reviewStatus.replace("_", " ").toUpperCase()}
+                  </span>
                 </div>
               ))}
             </div>
@@ -347,7 +352,12 @@ const PatientDashboard = ({ userData }) => {
           <div key={report._id} className="report-card">
             <div className="report-header">
               <span className={`report-type-badge ${report.reportType === "blood" ? "blood-type" : report.reportType === "urine" ? "urine-type" : ""}`}>{report.reportType?.toUpperCase()}</span>{" "}
-              <span className={`status-badge ${getStatusBadge(report.recommendation?.reviewStatus)}`}>{report.recommendation?.reviewStatus?.replace("_", " ").toUpperCase() || "PENDING"}</span>
+              <span className={`status-badge ${getStatusBadge(report.recommendation?.reviewStatus)}`}>
+                {!report.recommendation?.reviewStatus ? "PENDING" :
+                 report.recommendation.reviewStatus === "pending" ? "DOCTOR WILL BE ASSIGNED SHORTLY" :
+                 report.recommendation.reviewStatus === "under_review" ? `UNDER REVIEW BY ${report.recommendation.doctorId?.fullName || 'DOCTOR'}` :
+                 report.recommendation.reviewStatus.replace("_", " ").toUpperCase()}
+              </span>
             </div>
 
             <div className="report-details">
@@ -356,7 +366,7 @@ const PatientDashboard = ({ userData }) => {
               </p>
               {report.recommendation?.doctorId && (
                 <p>
-                  <strong>Reviewed by:</strong> {report.recommendation.doctorId.fullName}
+                  <strong>Reviewed by:</strong> Dr. {report.recommendation.doctorId.fullName}
                 </p>
               )}
             </div>
@@ -371,15 +381,6 @@ const PatientDashboard = ({ userData }) => {
               >
                 📋 View Details
               </button>
-              {/* <button
-                className="btn-insights"
-                onClick={() => {
-                  setSelectedReportId(report._id);
-                  setActiveTab("insights");
-                }}
-              >
-                🤖 View AI Insights
-              </button> */}
             </div>
 
           </div>
@@ -610,7 +611,10 @@ const PatientDashboard = ({ userData }) => {
               <div className="info-item">
                 <label>Status:</label>
                 <span className={`status-badge ${getStatusBadge(reportDetails.recommendation?.reviewStatus)}`}>
-                  {reportDetails.recommendation?.reviewStatus?.replace("_", " ").toUpperCase() || "PENDING"}
+                  {!reportDetails.recommendation?.reviewStatus ? "PENDING" :
+                   reportDetails.recommendation.reviewStatus === "pending" ? "DOCTOR WILL BE ASSIGNED SHORTLY" :
+                   reportDetails.recommendation.reviewStatus === "under_review" ? `UNDER REVIEW BY ${reportDetails.recommendation.doctorId?.fullName || 'DOCTOR'}` :
+                   reportDetails.recommendation.reviewStatus.replace("_", " ").toUpperCase()}
                 </span>
               </div>
               {reportDetails.recommendation?.doctorId && (
@@ -665,8 +669,8 @@ const PatientDashboard = ({ userData }) => {
             )}
           </div>
 
-          {/* AI Analysis Section */}
-          {reportDetails.recommendation?.aiSuggestions && (
+          {/* AI Analysis Section - Only show if approved */}
+          {reportDetails.recommendation?.reviewStatus === "approved" && reportDetails.recommendation?.aiSuggestions && (
             <div className="detail-section ai-analysis-section">
               <h3>🤖 AI Analysis</h3>
               <div className="ai-summary">
@@ -696,8 +700,8 @@ const PatientDashboard = ({ userData }) => {
             </div>
           )}
 
-          {/* Doctor Recommendations Section */}
-          {reportDetails.recommendation?.finalRecommendations && (
+          {/* Doctor Recommendations Section - Only show if approved */}
+          {reportDetails.recommendation?.reviewStatus === "approved" && reportDetails.recommendation?.finalRecommendations && (
             <div className="detail-section doctor-recommendations-section">
               <h3>👨‍⚕️ Doctor Recommendations</h3>
               
@@ -762,27 +766,29 @@ const PatientDashboard = ({ userData }) => {
             </div>
           )}
 
-          {/* Action Buttons */}
-          <div className="detail-section actions-section">
-            <h3>Actions</h3>
-            <div className="action-buttons">
-              <button 
-                className="btn-insights"
-                onClick={() => {
-                  setSelectedReportId(reportDetails._id);
-                  setActiveTab("insights");
-                }}
-              >
-                🤖 View Detailed AI Insights
-              </button>
-              <button 
-                className="btn-secondary"
-                onClick={() => window.print()}
-              >
-                🖨️ Print Report
-              </button>
+          {/* Action Buttons - Only show if approved */}
+          {reportDetails.recommendation?.reviewStatus === "approved" && (
+            <div className="detail-section actions-section">
+              <h3>Actions</h3>
+              <div className="action-buttons">
+                <button 
+                  className="btn-insights"
+                  onClick={() => {
+                    setSelectedReportId(reportDetails._id);
+                    setActiveTab("insights");
+                  }}
+                >
+                  🤖 View Detailed AI Insights
+                </button>
+                <button 
+                  className="btn-secondary"
+                  onClick={() => window.print()}
+                >
+                  🖨️ Print Report
+                </button>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
     );

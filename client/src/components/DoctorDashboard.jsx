@@ -418,7 +418,7 @@ const DoctorDashboard = ({ userData }) => {
               <div className="stat-icon">📋</div>
               <div className="stat-content">
                 <h3>{stats.pendingReviews || 0}</h3>
-                <p>Pending Reviews</p>
+                <p>To be Assigned</p>
               </div>
             </div>
             <div className="stat-card">
@@ -496,7 +496,7 @@ const DoctorDashboard = ({ userData }) => {
                   <strong>Created:</strong> {new Date(rec.createdAt).toLocaleDateString()}
                 </p>
                 <p>
-                  <strong>Approved:</strong> {new Date(rec?.reviewedAt)?.toLocaleDateString() || "-"}
+                  <strong>Approved at:</strong> {rec?.reviewedAt ? new Date(rec?.reviewedAt)?.toLocaleDateString() : "-"}
                 </p>
                 {rec.aiSuggestions?.riskFactors?.length > 0 && (
                   <p>
@@ -993,7 +993,7 @@ const DoctorDashboard = ({ userData }) => {
             Dashboard
           </button>
           <button className={`nav-tab ${activeTab === "pending" ? "active" : ""}`} onClick={() => handleTabChange("pending")} disabled={loading}>
-            Pending Reviews
+            To be assigned
           </button>
           <button className={`nav-tab ${activeTab === "assigned" ? "active" : ""}`} onClick={() => handleTabChange("assigned")} disabled={loading}>
             My Assignments
