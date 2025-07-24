@@ -12,6 +12,7 @@ import userRoutes from './routes/user.routes.js';
 import doctorReviewRoutes from './routes/doctorReview.routes.js';
 import healthReportRoutes from './routes/healthReport.routes.js';
 import aiRecommendationsRoutes from './routes/aiRecommendations.routes.js';
+import doctorPatientRoutes from './routes/doctorPatient.routes.js';
 
 // Initialize app
 const app = express();
@@ -34,6 +35,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/doctor-review', doctorReviewRoutes);
 app.use('/api/health-reports', healthReportRoutes);
 app.use('/api/ai-recommendations', aiRecommendationsRoutes);
+app.use('/api/doctor', doctorPatientRoutes);
 
 // Basic route
 app.get('/', (req, res) => {

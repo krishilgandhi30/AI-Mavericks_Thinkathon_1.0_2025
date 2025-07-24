@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import "./DoctorDashboard.css";
-import { FaUserMd, FaUser, FaCog, FaSignOutAlt } from "react-icons/fa";
+import { FaUserMd, FaUser, FaSignOutAlt } from "react-icons/fa";
 import api from "../utils/api.constant";
 import axios from "axios";
 
 const DoctorDashboard = ({ userData }) => {
   const [activeTab, setActiveTab] = useState("dashboard");
+  const [patients, setPatients] = useState([]);
   const [stats, setStats] = useState({});
   const [recommendations, setRecommendations] = useState([]);
   const [selectedRecommendation, setSelectedRecommendation] = useState(null);
@@ -109,6 +110,7 @@ const DoctorDashboard = ({ userData }) => {
     // Always fetch fresh data when switching tabs
     if (activeTab === "pending") fetchPendingRecommendations();
     else if (activeTab === "assigned") fetchAssignedRecommendations();
+    else if (activeTab === "patients") fetchPatients();
     else if (activeTab !== "dashboard" && activeTab !== "profile") setRecommendations([]);
   }, [activeTab]);
 
@@ -177,6 +179,55 @@ const DoctorDashboard = ({ userData }) => {
     } catch (error) {
       console.error("Error fetching assigned recommendations:", error);
       setRecommendations([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchPatients = async () => {
+    setLoading(true);
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+
+      // In a real implementation, you would fetch patients from the API
+      // For now, we'll extract unique patients from recommendations
+      const response = await axios.get("http://localhost:5000/api/doctor-review/assigned", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const recommendations = response.data.recommendations || [];
+
+      // Extract unique patients from recommendations
+      const uniquePatients = [];
+      const patientIds = new Set();
+
+      recommendations.forEach((rec) => {
+        if (rec.patientId && !patientIds.has(rec.patientId._id)) {
+          patientIds.add(rec.patientId._id);
+          uniquePatients.push({
+            id: rec.patientId._id,
+            name: rec.patientId.fullName,
+            email: rec.patientId.email,
+            reportsCount: 1,
+            lastReport: rec.createdAt,
+          });
+        } else if (rec.patientId) {
+          // Increment report count for existing patient
+          const patient = uniquePatients.find((p) => p.id === rec.patientId._id);
+          if (patient) {
+            patient.reportsCount++;
+            if (new Date(rec.createdAt) > new Date(patient.lastReport)) {
+              patient.lastReport = rec.createdAt;
+            }
+          }
+        }
+      });
+
+      setPatients(uniquePatients);
+    } catch (error) {
+      console.error("Error fetching patients:", error);
+      setPatients([]);
     } finally {
       setLoading(false);
     }
@@ -315,34 +366,34 @@ const DoctorDashboard = ({ userData }) => {
       alert("Error approving recommendation");
     }
   };
-  
+
   const updateAIRecommendations = async () => {
     try {
       if (!reviewData.doctorFeedbackToAI) {
         alert("Please provide feedback to the AI system before requesting an update.");
         return;
       }
-      
+
       const token = localStorage.getItem("token");
       if (!token) return;
-      
+
       setLoading(true);
-      
+
       await axios.post(
         `http://localhost:5000/api/doctor-review/${selectedRecommendation._id}/update-ai`,
         {
-          doctorFeedbackToAI: reviewData.doctorFeedbackToAI
+          doctorFeedbackToAI: reviewData.doctorFeedbackToAI,
         },
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      
+
       alert("AI recommendations updated successfully based on your feedback!");
-      
+
       // Refresh the recommendation details to show updated AI insights
       await openRecommendationDetails({ _id: selectedRecommendation._id });
-      
+
       // Refresh dashboard stats
       fetchDashboardStats();
     } catch (error) {
@@ -444,7 +495,7 @@ const DoctorDashboard = ({ userData }) => {
                 <p>
                   <strong>Created:</strong> {new Date(rec.createdAt).toLocaleDateString()}
                 </p>
-                                <p>
+                <p>
                   <strong>Approved:</strong> {new Date(rec?.reviewedAt)?.toLocaleDateString() || "-"}
                 </p>
                 {rec.aiSuggestions?.riskFactors?.length > 0 && (
@@ -652,9 +703,10 @@ const DoctorDashboard = ({ userData }) => {
                   </div>
                   <div className="info-item">
                     <strong>Gender:</strong> {selectedRecommendation.patientId?.gender || "N/A"}
-                  </div>                  
+                  </div>
                   <div className="info-item">
-                    <strong>Age:</strong> {selectedRecommendation.patientId?.dateOfBirth ? Math.floor((new Date() - new Date(selectedRecommendation.patientId.dateOfBirth)) / (365.25 * 24 * 60 * 60 * 1000))  : "N/A"}
+                    <strong>Age:</strong>{" "}
+                    {selectedRecommendation.patientId?.dateOfBirth ? Math.floor((new Date() - new Date(selectedRecommendation.patientId.dateOfBirth)) / (365.25 * 24 * 60 * 60 * 1000)) : "N/A"}
                   </div>
                   <div className="info-item">
                     <strong>Blood Group:</strong> {selectedRecommendation.patientId?.bloodGroup || "N/A"}
@@ -680,32 +732,33 @@ const DoctorDashboard = ({ userData }) => {
 
                 {selectedRecommendation.reportId ? (
                   <div className="report-metrics">
-                    {selectedRecommendation.reportId.reportType === "blood" && selectedRecommendation.reportId.bloodMetrics && (
-                      Object.entries(selectedRecommendation.reportId.bloodMetrics).map(([key, value]) => (
+                    {selectedRecommendation.reportId.reportType === "blood" &&
+                      selectedRecommendation.reportId.bloodMetrics &&
+                      Object.entries(selectedRecommendation.reportId.bloodMetrics).map(([key, value]) =>
                         value && typeof value === "object" && value.value ? (
                           <div className="metric-item" key={key}>
-                                <strong>{key}:</strong>
-                                <span>
-                                  {value.value} {value.unit} {value.normalRange ? `(Normal Range: ${value.normalRange})` : ""}
-                                </span>
-                              </div>
-                            ) : null
-                          ))
-                          )}
-                    {selectedRecommendation.reportId.reportType === "urine" && selectedRecommendation.reportId.urineMetrics && (
-                      Object.entries(selectedRecommendation.reportId.urineMetrics).map(([key, value]) => (
-                        value && typeof value === "object" && (value.value !== undefined) ? (
+                            <strong>{key}:</strong>
+                            <span>
+                              {value.value} {value.unit} {value.normalRange ? `(Normal Range: ${value.normalRange})` : ""}
+                            </span>
+                          </div>
+                        ) : null
+                      )}
+                    {selectedRecommendation.reportId.reportType === "urine" &&
+                      selectedRecommendation.reportId.urineMetrics &&
+                      Object.entries(selectedRecommendation.reportId.urineMetrics).map(([key, value]) =>
+                        value && typeof value === "object" && value.value !== undefined ? (
                           <div className="metric-item" key={key}>
-                              <strong>{key}:</strong>
-                              <span>
-                                {value.value} {value.normalRange ? `(Normal Range: ${value.normalRange})` : ""}
-                              </span>
-                            </div>
-                          ) : null
-                        ))
-                        )}
+                            <strong>{key}:</strong>
+                            <span>
+                              {value.value} {value.normalRange ? `(Normal Range: ${value.normalRange})` : ""}
+                            </span>
+                          </div>
+                        ) : null
+                      )}
                     {/* Fallback for reportData if available */}
-                    {selectedRecommendation.reportId.reportData && Object.entries(selectedRecommendation.reportId.reportData).map(([key, value]) => (
+                    {selectedRecommendation.reportId.reportData &&
+                      Object.entries(selectedRecommendation.reportId.reportData).map(([key, value]) => (
                         <div className="metric-item" key={key}>
                           <strong>{key}:</strong>
                           <span>
@@ -724,14 +777,14 @@ const DoctorDashboard = ({ userData }) => {
                       !selectedRecommendation.reportId.bloodMetrics &&
                       !selectedRecommendation.reportId.urineMetrics &&
                       !selectedRecommendation.reportId.reportData &&
-                      Object.entries(selectedRecommendation.reportId.metrics).map(([key, value]) => (
+                      Object.entries(selectedRecommendation.reportId.metrics).map(([key, value]) =>
                         value !== undefined && value !== null ? (
                           <div className="metric-item" key={key}>
                             <strong>{key}:</strong>
                             <span>{value}</span>
                           </div>
                         ) : null
-                      ))}
+                      )}
                   </div>
                 ) : (
                   <p>No report data available</p>
@@ -818,7 +871,7 @@ const DoctorDashboard = ({ userData }) => {
                   />
                 </div>
 
-                <div className="review-actions" style={{ display: 'flex', gap: '15px', flexWrap: 'nowrap', justifyContent: 'space-between' }}>
+                <div className="review-actions" style={{ display: "flex", gap: "15px", flexWrap: "nowrap", justifyContent: "space-between" }}>
                   {selectedRecommendation.reviewStatus === "approved" ? (
                     <div className="review-status-message approved">
                       <p>This recommendation was approved on {new Date(selectedRecommendation.approvedAt).toLocaleDateString()}</p>
@@ -834,11 +887,15 @@ const DoctorDashboard = ({ userData }) => {
                       </button>
                     </div>
                   ) : (
-                    <div style={{ display: 'flex', width: '100%', gap: '15px', justifyContent: 'space-between', flexWrap: 'wrap' }}>
-                      <button className="btn-approve" onClick={approveRecommendation} style={{ flex: '1' }}>
+                    <div style={{ display: "flex", width: "100%", gap: "15px", justifyContent: "space-between", flexWrap: "wrap" }}>
+                      <button className="btn-approve" onClick={approveRecommendation} style={{ flex: "1" }}>
                         Approve Recommendation
                       </button>
-                      <button className="btn-update-ai" onClick={updateAIRecommendations} style={{ flex: '1', backgroundColor: '#6200ea', color: 'white', border: 'none', borderRadius: '4px', padding: '10px', cursor: 'pointer' }}>
+                      <button
+                        className="btn-update-ai"
+                        onClick={updateAIRecommendations}
+                        style={{ flex: "1", backgroundColor: "#6200ea", color: "white", border: "none", borderRadius: "4px", padding: "10px", cursor: "pointer" }}
+                      >
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                           <path d="M21 2v6h-6"></path>
                           <path d="M3 12a9 9 0 0 1 15-6.7L21 8"></path>
@@ -847,7 +904,7 @@ const DoctorDashboard = ({ userData }) => {
                         </svg>
                         Update AI Report
                       </button>
-                      <button className="btn-cancel" onClick={() => setSelectedRecommendation(null)} style={{ flex: '1' }}>
+                      <button className="btn-cancel" onClick={() => setSelectedRecommendation(null)} style={{ flex: "1" }}>
                         Cancel
                       </button>
                     </div>
@@ -874,6 +931,51 @@ const DoctorDashboard = ({ userData }) => {
     };
   }, [userMenuRef]);
 
+  // Render patients list
+  const renderPatientsList = () => (
+    <div className="patients-container">
+      <h2>Patient Analysis</h2>
+      {loading ? (
+        <div className="loading-spinner">
+          <div className="spinner"></div>
+          <div>Loading patients...</div>
+        </div>
+      ) : (
+        <div className="patients-grid">
+          {patients.map((patient) => (
+            <div key={patient.id} className="patient-card">
+              <div className="patient-card-header">
+                <h4>{patient.name}</h4>
+              </div>
+              <div className="patient-card-body">
+                <p>
+                  <strong>Email:</strong> {patient.email}
+                </p>
+                <p>
+                  <strong>Reports:</strong> {patient.reportsCount}
+                </p>
+                <p>
+                  <strong>Last Report:</strong> {new Date(patient.lastReport).toLocaleDateString()}
+                </p>
+              </div>
+              <div className="patient-card-actions">
+                <button className="btn-view-analysis" onClick={() => navigate(`/patient-analysis/${patient.id}`)}>
+                  View Health Analysis
+                </button>
+              </div>
+            </div>
+          ))}
+          {patients.length === 0 && !loading && (
+            <div className="empty-state">
+              <img src="/empty-state.svg" alt="No patients" style={{ width: "120px", marginBottom: "1rem" }} />
+              <p>No patients found.</p>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+
   // Always render the same component structure to maintain consistent hook calls
   return (
     <div className="doctor-dashboard">
@@ -895,6 +997,9 @@ const DoctorDashboard = ({ userData }) => {
           </button>
           <button className={`nav-tab ${activeTab === "assigned" ? "active" : ""}`} onClick={() => handleTabChange("assigned")} disabled={loading}>
             My Assignments
+          </button>
+          <button className={`nav-tab ${activeTab === "patients" ? "active" : ""}`} onClick={() => handleTabChange("patients")} disabled={loading}>
+            Patient Analysis
           </button>
         </div>
         <div className="nav-user" ref={userMenuRef}>
@@ -945,6 +1050,7 @@ const DoctorDashboard = ({ userData }) => {
         <main className="dashboard-main">
           {activeTab === "dashboard" && renderDashboard()}
           {(activeTab === "pending" || activeTab === "assigned") && renderRecommendationsList()}
+          {activeTab === "patients" && renderPatientsList()}
           {activeTab === "profile" && renderProfile()}
         </main>
       )}

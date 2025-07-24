@@ -9,6 +9,7 @@ import RoleBasedDashboard from './components/RoleBasedDashboard'
 import ForgotPassword from './components/ForgotPassword'
 import ResetPassword from './components/ResetPassword'
 import DoctorDashboard from './components/DoctorDashboard'
+import PatientAnalysis from './components/PatientAnalysis'
 import ProtectedRoute from './components/ProtectedRoute'
 import { ToastProvider } from './contexts/ToastContext'
 
@@ -25,6 +26,7 @@ const router = createBrowserRouter(
       <Route path='/dashboard' element={<ProtectedRoute><RoleBasedDashboard /></ProtectedRoute>} />
       <Route path='/dashboard/patient' element={<ProtectedRoute><PatientDashboard /></ProtectedRoute>} />
       <Route path='/dashboard/doctor' element={<ProtectedRoute><DoctorDashboard /></ProtectedRoute>} />
+      <Route path='/patient-analysis/:patientId' element={<ProtectedRoute><PatientAnalysis /></ProtectedRoute>} />
 
       {/* Admin Routes */}
       <Route path='/admin' element={<ProtectedRoute><DoctorDashboard /></ProtectedRoute>} />

@@ -266,8 +266,8 @@ export const getAssignedRecommendations = async (req, res) => {
         const recommendations = await Recommendation.find({ 
             doctorId
             // No status filter - show all reports assigned to this doctor
-        })
-        .populate('patientId', 'fullName')
+        })        
+        .populate('patientId', 'fullName email')
         .populate('reportId', 'reportType reportData')
         .sort({ reviewedAt: -1 });
 

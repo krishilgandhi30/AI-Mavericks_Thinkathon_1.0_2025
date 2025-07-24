@@ -251,13 +251,15 @@
   text-align: center;
 }
 
-.recommendations-grid {
+.recommendations-grid,
+.patients-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
   gap: 20px;
 }
 
-.recommendation-card {
+.recommendation-card,
+.patient-card {
   background: white;
   border-radius: 15px;
   overflow: hidden;
@@ -269,7 +271,8 @@
   transform: translateY(-5px);
 }
 
-.card-header {
+.card-header,
+.patient-card-header {
   color: Black;
   padding: 20px;
   display: flex;
@@ -330,7 +333,8 @@
   color: white;
 }
 
-.card-body {
+.card-body,
+.patient-card-body {
   padding: 20px;
 }
 
@@ -362,13 +366,15 @@
   color: #e74c3c;
 }
 
-.card-actions {
+.card-actions,
+.patient-card-actions {
   padding: 20px;
   border-top: 1px solid #ecf0f1;
 }
 
 .btn-assign,
-.btn-review {
+.btn-review,
+.btn-view-analysis {
   width: 100%;
   padding: 12px;
   border: none;
@@ -399,7 +405,8 @@
 }
 
 .btn-assign:hover,
-.btn-review:hover {
+.btn-review:hover,
+.btn-view-analysis:hover {
   transform: translateY(-2px);
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
 }
@@ -487,30 +494,6 @@
   background: linear-gradient(135deg, #5a67d8, #6b46c1);
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
-}
-
-.btn-back {
-  padding: 12px 24px;
-  background: linear-gradient(135deg, #3498db, #2980b9);
-  color: white;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: 600;
-  font-size: 1rem;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-}
-
-.btn-back:hover {
-  background: linear-gradient(135deg, #2980b9, #1a5276);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
 }
 
 .review-header h2 {
@@ -1062,17 +1045,6 @@
   gap: 1rem;
   justify-content: center;
 }
-.btn-save {
-  background: linear-gradient(135deg, #27ae60, #2ecc71);
-  color: white;
-  border: none;
-  border-radius: 8px;
-  padding: 0.7rem 1.5rem;
-  font-weight: 600;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: background 0.2s, color 0.2s;
-}
 .btn-save:hover {
   background: #219150;
 }
@@ -1096,5 +1068,37 @@
   }
   .profile-edit-form {
     padding: 1rem 0.5rem;
+  }
+}
+.patients-container {
+  padding: 20px;
+}
+
+.patients-container h2 {
+  color: white;
+  font-size: 2rem;
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.btn-view-analysis {
+  background: linear-gradient(135deg, #6200ea, #3700b3);
+  color: white;
+}
+
+.patient-card-header {
+  background: #ecf0f1;
+  color: #2c3e50;
+}
+
+.patients-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+@media (max-width: 768px) {
+  .patients-grid {
+    grid-template-columns: 1fr;
   }
 }
