@@ -7,7 +7,8 @@ import {
     getDoctorDashboardStats,
     provideFeedbackToAI,
     getPendingRecommendations,
-    getAssignedRecommendations
+    getAssignedRecommendations,
+    updateAIRecommendations
 } from '../controllers/doctorReview.controllers.js';
 import { Authenticate } from '../middleware/auth.middleware.js';
 
@@ -28,5 +29,8 @@ router.post('/:recommendationId/reject', Authenticate, rejectRecommendation);
 
 // AI feedback
 router.post('/:recommendationId/feedback', Authenticate, provideFeedbackToAI);
+
+// Update AI recommendations based on doctor feedback
+router.post('/:recommendationId/update-ai', Authenticate, updateAIRecommendations);
 
 export default router;

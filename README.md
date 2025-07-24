@@ -1,93 +1,394 @@
-# AI Mavericks - Thinkathon
+# 🏥 AI-Powered Healthcare Management System
 
+An intelligent healthcare platform that leverages AI to analyze medical reports, generate personalized recommendations, and facilitate doctor-patient collaboration for better health outcomes.
 
+## 🌟 Features
 
-## Getting started
+### For Patients
+- **📋 Health Report Upload**: Upload blood test and urine test reports
+- **🤖 AI-Powered Analysis**: Get instant AI-generated health insights and recommendations
+- **📊 Health Dashboard**: Track your health metrics and view historical data
+- **💊 Personalized Treatment Plans**: Receive customized medication and lifestyle recommendations
+- **📈 Health Insights**: Comprehensive analysis of your health reports with risk assessments
+- **👤 User Profile Management**: Manage personal health information and medical history
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+### For Doctors
+- **🏥 Doctor Dashboard**: Review pending patient recommendations and manage caseload
+- **✅ Recommendation Review**: Approve, modify, or reject AI-generated recommendations
+- **📝 Clinical Notes**: Add professional medical notes and feedback
+- **🔄 AI Collaboration**: Provide feedback to improve AI recommendations
+- **📊 Statistics & Analytics**: Track review metrics and patient outcomes
+- **⚡ Priority Management**: Handle urgent cases and manage workflow efficiently
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+### AI Capabilities
+- **🧠 Intelligent Analysis**: Advanced AI processing of medical reports using OpenAI
+- **🎯 Risk Assessment**: Automated identification of health risks and urgency levels
+- **💡 Treatment Suggestions**: Evidence-based medication and lifestyle recommendations
+- **📈 Health Scoring**: Comprehensive health score calculation
+- **🔄 Continuous Learning**: AI improvements based on doctor feedback
 
-## Add your files
-
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/topics/git/add_files/#add-files-to-a-git-repository) or push an existing Git repository with the following command:
+## 🏗️ Architecture
 
 ```
-cd existing_repo
-git remote add origin https://gitlab.com/krishil.gandhi-group/ai-mavericks-thinkathon.git
-git branch -M main
-git push -uf origin main
+ai-mavericks-thinkathon/
+├── client/                     # React Frontend Application
+│   ├── src/
+│   │   ├── components/         # React Components
+│   │   │   ├── Login.jsx       # Authentication component
+│   │   │   ├── SignUp.jsx      # User registration
+│   │   │   ├── PatientDashboard.jsx    # Patient interface
+│   │   │   ├── DoctorDashboard.jsx     # Doctor interface
+│   │   │   ├── HealthReportUpload.jsx  # Report upload functionality
+│   │   │   ├── HealthInsights.jsx      # AI insights display
+│   │   │   └── RoleBasedDashboard.jsx  # Role-based routing
+│   │   ├── contexts/           # React Context for state management
+│   │   ├── utils/              # API utilities and constants
+│   │   └── assets/             # Static assets and images
+│   └── package.json
+├── server/                     # Node.js Backend API
+│   ├── controllers/            # Business logic controllers
+│   │   ├── auth.controllers.js         # Authentication logic
+│   │   ├── healthReport.controllers.js # Health report management
+│   │   ├── aiRecommendations.controllers.js # AI processing
+│   │   └── doctorReview.controllers.js # Doctor review system
+│   ├── models/                 # MongoDB data models
+│   │   ├── user.models.js      # User schema
+│   │   ├── healthReport.models.js      # Health report schema
+│   │   └── recommendation.model.js     # AI recommendation schema
+│   ├── routes/                 # API route definitions
+│   ├── middleware/             # Authentication and validation
+│   ├── services/               # External service integrations
+│   │   └── aiRecommendationService.js  # OpenAI integration
+│   └── server.js               # Application entry point
+└── README.md
 ```
 
-## Integrate with your tools
+## 🚀 Technology Stack
 
-- [ ] [Set up project integrations](https://gitlab.com/krishil.gandhi-group/ai-mavericks-thinkathon/-/settings/integrations)
+### Frontend
+- **React 18** - Modern UI library with hooks
+- **React Router** - Client-side routing
+- **Axios** - HTTP client for API communication
+- **React Icons** - Icon library
+- **Vite** - Fast build tool and development server
+- **CSS3** - Custom styling with responsive design
 
-## Collaborate with your team
+### Backend
+- **Node.js** - JavaScript runtime environment
+- **Express.js** - Web application framework
+- **MongoDB** - NoSQL database for data storage
+- **Mongoose** - MongoDB object modeling
+- **OpenAI API** - AI-powered health analysis
+- **JWT** - JSON Web Token authentication
+- **bcryptjs** - Password hashing
+- **Multer** - File upload handling
+- **CORS** - Cross-origin resource sharing
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Set auto-merge](https://docs.gitlab.com/user/project/merge_requests/auto_merge/)
+### Development Tools
+- **ESLint** - Code linting and formatting
+- **Nodemon** - Development server auto-restart
+- **dotenv** - Environment variable management
 
-## Test and Deploy
+## 📋 Prerequisites
 
-Use the built-in continuous integration in GitLab.
+Before running this application, make sure you have:
 
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+- **Node.js** (v16 or higher)
+- **MongoDB** (local installation or MongoDB Atlas)
+- **OpenAI API Key** (for AI functionality)
+- **Git** (for version control)
 
-***
+## ⚙️ Installation & Setup
 
-# Editing this README
+### 1. Clone the Repository
+```bash
+git clone https://github.com/your-username/ai-mavericks-thinkathon.git
+cd ai-mavericks-thinkathon
+```
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
+### 2. Backend Setup
 
-## Suggestions for a good README
+Navigate to the server directory:
+```bash
+cd server
+```
 
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+Install dependencies:
+```bash
+npm install
+```
 
-## Name
-Choose a self-explaining name for your project.
+Create environment variables file:
+```bash
+# Create .env file in server directory
+touch .env
+```
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+Add the following environment variables to `.env`:
+```env
+# Database Configuration
+MONGO_URI=mongodb://localhost:27017/healthcare-ai
+# or for MongoDB Atlas:
+# MONGO_URI=mongodb+srv://username:password@cluster.mongodb.net/healthcare-ai
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+# JWT Configuration
+JWT_SECRET=your-super-secret-jwt-key-here
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+# OpenAI Configuration
+OPENAI_API_KEY=your-openai-api-key-here
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+# Server Configuration
+PORT=5000
+NODE_ENV=development
+```
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+### 3. Frontend Setup
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+Navigate to the client directory:
+```bash
+cd ../client
+```
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+Install dependencies:
+```bash
+npm install
+```
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
+## 🏃‍♂️ Running the Application
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
+### Start the Backend Server
+```bash
+cd server
+npm start
+```
+The server will run on `http://localhost:5000`
 
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
+### Start the Frontend Application
+```bash
+cd client
+npm run dev
+```
+The client will run on `http://localhost:5173`
 
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
+## 📝 API Documentation
 
-## License
-For open source projects, say how it is licensed.
+### Authentication Endpoints
+- `POST /api/auth/register` - User registration
+- `POST /api/auth/login` - User login
+- `POST /api/auth/forgot-password` - Password reset request
+- `POST /api/auth/reset-password` - Password reset confirmation
 
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+### Health Report Endpoints
+- `POST /api/health-reports/upload` - Upload and analyze health report
+- `GET /api/health-reports/patient` - Get patient's health reports
+- `GET /api/health-reports/:reportId` - Get specific report details
+
+### AI Recommendations Endpoints
+- `GET /api/ai-recommendations/insights/:reportId` - Get AI health insights
+- `GET /api/ai-recommendations/personalized` - Get personalized recommendations
+
+### Doctor Review Endpoints
+- `GET /api/doctor-review/stats` - Get doctor dashboard statistics
+- `GET /api/doctor-review/pending` - Get pending recommendations
+- `GET /api/doctor-review/assigned` - Get assigned recommendations
+- `POST /api/doctor-review/:id/approve` - Approve recommendation
+- `POST /api/doctor-review/:id/reject` - Reject recommendation
+- `POST /api/doctor-review/:id/update-ai` - Update AI based on feedback
+
+## 👥 User Roles & Permissions
+
+### Patient Role
+- Upload health reports
+- View AI-generated recommendations
+- Access personal health dashboard
+- View approved treatment plans
+- Manage profile information
+
+### Doctor Role
+- Review AI-generated recommendations
+- Approve or reject recommendations with notes
+- Provide feedback to AI system
+- View patient health reports
+- Manage assigned cases
+
+## 🔐 Security Features
+
+- **JWT Authentication** - Secure token-based authentication
+- **Password Hashing** - bcrypt encryption for passwords
+- **Role-Based Access Control** - Different permissions for patients and doctors
+- **Data Validation** - Input validation and sanitization
+- **CORS Protection** - Cross-origin request security
+
+## 🤖 AI Integration
+
+The application integrates with OpenAI's GPT models to provide:
+
+- **Intelligent Report Analysis** - Automated analysis of blood and urine test results
+- **Risk Assessment** - Identification of potential health risks
+- **Treatment Recommendations** - Evidence-based treatment suggestions
+- **Lifestyle Advice** - Personalized lifestyle and dietary recommendations
+- **Follow-up Planning** - Automated scheduling suggestions
+
+## 📊 Database Schema
+
+### User Model
+```javascript
+{
+  fullName: String,
+  username: String,
+  email: String,
+  password: String,
+  role: ['patient', 'doctor'],
+  gender: String,
+  dateOfBirth: Date,
+  medicalHistory: [String],
+  bloodGroup: String
+}
+```
+
+### Health Report Model
+```javascript
+{
+  patientId: ObjectId,
+  reportType: ['blood', 'urine'],
+  bloodMetrics: Object,
+  urineMetrics: Object,
+  patientNotes: String,
+  isAnalyzed: Boolean,
+  analysisDate: Date
+}
+```
+
+### Recommendation Model
+```javascript
+{
+  reportId: ObjectId,
+  patientId: ObjectId,
+  doctorId: ObjectId,
+  aiSuggestions: Object,
+  doctorModifications: Object,
+  finalRecommendations: Object,
+  reviewStatus: ['pending', 'under_review', 'approved', 'rejected'],
+  confidenceScore: Number,
+  doctorNotes: String
+}
+```
+
+## 🚀 Development Workflow
+
+### Adding New Features
+1. Create feature branch from `main`
+2. Implement backend API endpoints
+3. Add corresponding frontend components
+4. Test functionality thoroughly
+5. Submit pull request for review
+
+### Code Standards
+- Use ESLint for code formatting
+- Follow React best practices
+- Implement proper error handling
+- Add comprehensive comments
+- Maintain consistent naming conventions
+
+## 🔧 Environment Configuration
+
+### Development Environment
+```env
+NODE_ENV=development
+MONGO_URI=mongodb://localhost:27017/healthcare-ai-dev
+JWT_SECRET=dev-secret-key
+OPENAI_API_KEY=your-dev-openai-key
+```
+
+### Production Environment
+```env
+NODE_ENV=production
+MONGO_URI=your-production-mongodb-uri
+JWT_SECRET=your-production-secret-key
+OPENAI_API_KEY=your-production-openai-key
+```
+
+## 📱 Responsive Design
+
+The application is fully responsive and works on:
+- **Desktop** - Full-featured experience
+- **Tablet** - Optimized layout for touch interaction
+- **Mobile** - Mobile-first design with touch-friendly interfaces
+
+## 🛠️ Build & Deployment
+
+### Build for Production
+```bash
+# Build frontend
+cd client
+npm run build
+
+# Start production server
+cd ../server
+npm start
+```
+
+### Deployment Options
+- **Heroku** - Easy deployment with MongoDB Atlas
+- **Vercel** - Frontend deployment with serverless functions
+- **DigitalOcean** - Full-stack deployment on droplets
+- **AWS** - Scalable cloud deployment
+
+## 🧪 Testing
+
+### Running Tests
+```bash
+# Frontend tests
+cd client
+npm test
+
+# Backend tests
+cd server
+npm test
+```
+
+## 📈 Performance Optimization
+
+- **Code Splitting** - Lazy loading of components
+- **Image Optimization** - Compressed images and lazy loading
+- **API Caching** - Intelligent caching strategies
+- **Database Indexing** - Optimized MongoDB queries
+- **CDN Integration** - Fast asset delivery
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 📄 License
+
+This project is licensed under the ISC License - see the [LICENSE](LICENSE) file for details.
+
+## 👥 Team
+
+- **Himanshu** - Backend Developer & AI Integration
+- **Team Members** - Frontend Development & UI/UX Design
+
+## 📞 Support
+
+For support and questions:
+- **Email**: support@healthcare-ai.com
+- **Documentation**: [Project Wiki](wiki-link)
+- **Issues**: [GitHub Issues](issues-link)
+
+## 🔮 Future Enhancements
+
+- **Mobile App** - React Native mobile application
+- **Telemedicine** - Video consultation integration
+- **Wearable Integration** - Fitness tracker data integration
+- **Advanced Analytics** - Machine learning insights
+- **Multi-language Support** - Internationalization
+- **Voice Interface** - Voice-controlled interactions
+- **Blockchain Integration** - Secure health record storage
+
+---
+
+**Made with ❤️ for better healthcare through AI**

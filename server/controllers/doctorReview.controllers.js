@@ -1,6 +1,6 @@
 import Recommendation from '../models/recommendation.model.js';
 import HealthReport from '../models/healthReport.models.js';
-import User from '../models/user.models.js';
+import AIHealthRecommendationService from '../services/aiRecommendationService.js';
 
 // Get single recommendation details for review
 export const getRecommendationDetails = async (req, res) => {
@@ -85,7 +85,7 @@ export const approveRecommendation = async (req, res) => {
         }
 
         // Set final recommendations
-        recommendation.finalRecommendations = finalRecommendations || {
+        recommendation.finalRecommendations = recommendation.aiSuggestions || {
             treatmentPlan: recommendation.doctorModifications?.treatmentPlan || recommendation.aiSuggestions.treatmentPlan,
             lifestyleChanges: recommendation.doctorModifications?.lifestyleChanges || recommendation.aiSuggestions.lifestyleChanges
         };
@@ -266,15 +266,74 @@ export const getAssignedRecommendations = async (req, res) => {
         const recommendations = await Recommendation.find({ 
             doctorId
             // No status filter - show all reports assigned to this doctor
-        })
-        .populate('patientId', 'fullName')
+        })        
+        .populate('patientId', 'fullName email')
         .populate('reportId', 'reportType reportData')
-        .sort({ assignedAt: -1 });
+        .sort({ reviewedAt: -1 });
 
         res.json({ recommendations });
     } catch (error) {
         console.error('Error fetching assigned recommendations:', error);
         res.status(500).json({ message: 'Failed to fetch assigned recommendations' });
+    }
+};
+
+// Update AI recommendations based on doctor feedback
+export const updateAIRecommendations = async (req, res) => {
+    try {
+        const { recommendationId } = req.params;
+        const { doctorFeedbackToAI } = req.body;
+
+        if (!doctorFeedbackToAI) {
+            return res.status(400).json({ message: 'Doctor feedback is required to update AI recommendations' });
+        }
+
+        // Find the recommendation
+        const recommendation = await Recommendation.findById(recommendationId)
+            .populate('reportId')
+            .populate('patientId', 'fullName email gender dateOfBirth medicalHistory bloodGroup age');
+
+        if (!recommendation) {
+            return res.status(404).json({ message: 'Recommendation not found' });
+        }
+
+        // Get patient profile for enhanced analysis
+        const patientProfile = {
+            age: recommendation.patientId.age || 30,
+            gender: recommendation.patientId.gender || 'unknown',
+            bloodGroup: recommendation.patientId.bloodGroup,
+            medicalHistory: recommendation.patientId.medicalHistory || [],
+            currentMedications: recommendation.patientId.currentMedications || []
+        };
+
+        // Add doctor feedback to the recommendation object before passing it to the service
+        recommendation.doctorFeedbackToAI = doctorFeedbackToAI;
+        
+        // Generate updated AI analysis based on doctor feedback using OpenAI
+        const updatedAIInsights = await AIHealthRecommendationService.getAIInsights(
+            recommendation,
+            patientProfile
+        );
+
+        // Update the recommendation with new AI insights
+        recommendation.aiSuggestions = updatedAIInsights;
+        recommendation.doctorFeedbackToAI = doctorFeedbackToAI;
+        recommendation.reviewStatus = 'under_review';
+        recommendation.lastModified = new Date();
+
+        await recommendation.save();
+
+        res.json({
+            message: 'AI recommendations updated successfully based on doctor feedback',
+            recommendation
+        });
+
+    } catch (error) {
+        console.error('Error updating AI recommendations:', error);
+        res.status(500).json({ 
+            message: 'Failed to update AI recommendations', 
+            error: error.message 
+        });
     }
 };
 
@@ -286,5 +345,6 @@ export default {
     getDoctorDashboardStats,
     provideFeedbackToAI,
     getPendingRecommendations,
-    getAssignedRecommendations
+    getAssignedRecommendations,
+    updateAIRecommendations
 };

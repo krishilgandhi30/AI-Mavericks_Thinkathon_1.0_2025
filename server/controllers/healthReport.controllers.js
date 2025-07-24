@@ -7,7 +7,7 @@ import AIHealthRecommendationService from '../services/aiRecommendationService.j
 const analyzeHealthReport = async (reportData, patientProfile = {}) => {
     // Use the enhanced AI service for comprehensive analysis
     try {
-        const aiAnalysis = await AIHealthRecommendationService.generateHealthRecommendations(reportData, patientProfile);
+        const aiAnalysis = await AIHealthRecommendationService.getAIInsights(reportData, patientProfile);
         return aiAnalysis;
     } catch (error) {
         console.error('Enhanced AI analysis failed, falling back to basic analysis:', error);
