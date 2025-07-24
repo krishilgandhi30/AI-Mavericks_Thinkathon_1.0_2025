@@ -140,7 +140,7 @@ export const forgotpassword = async (req, res) => {
 		const resetLink = `${origin}/resetpassword/${token}`;
 		res.json({ resetLink, token, message: "Reset link generated successfully" });
 	} catch (error) {
-		console.log(error);
+		console.error(error);
 		res.status(500).json({ message: "Internal server error" });
 	}
 }
