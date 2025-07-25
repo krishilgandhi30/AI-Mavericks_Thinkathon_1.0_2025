@@ -17,6 +17,7 @@
   height: 100%;
   z-index: 1;
   background-image: url('../assets/icon/login_background.png');
+  background-size: cover;
   opacity: 0.6;
 }
 
@@ -101,8 +102,8 @@
 
 .login-icon {
   margin: 0 auto 16px;
-  width: 48px;
-  height: 48px;
+  width: 55px;
+  height: 55px;
 }
 
 .login-title {

@@ -92,10 +92,10 @@ function Login() {
 		<div className="login-container">
 			{/* Background Animation */}
 			<div className="login-bg">
-				<div className="floating-shape shape-1"></div>
+				{/* <div className="floating-shape shape-1"></div>
 				<div className="floating-shape shape-2"></div>
 				<div className="floating-shape shape-3"></div>
-				<div className="floating-shape shape-4"></div>
+				<div className="floating-shape shape-4"></div> */}
 			</div>
 
 			<div className="login-content">
