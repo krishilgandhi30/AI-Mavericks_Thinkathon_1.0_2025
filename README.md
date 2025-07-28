@@ -27,40 +27,99 @@ An intelligent healthcare platform that leverages AI to analyze medical reports,
 - **📈 Health Scoring**: Comprehensive health score calculation
 - **🔄 Continuous Learning**: AI improvements based on doctor feedback
 
-## 🏗️ Architecture
+## 🏗️ Project Architecture
 
 ```
-ai-mavericks-thinkathon/
-├── client/                     # React Frontend Application
+AI-Mavericks_Thinkathon_1.0_2025/
+├── client/                          # React Frontend Application
+│   ├── public/                      # Static assets
+│   │   ├── index.html
+│   │   └── favicon.ico
 │   ├── src/
-│   │   ├── components/         # React Components
-│   │   │   ├── Login.jsx       # Authentication component
-│   │   │   ├── SignUp.jsx      # User registration
-│   │   │   ├── PatientDashboard.jsx    # Patient interface
-│   │   │   ├── DoctorDashboard.jsx     # Doctor interface
-│   │   │   ├── HealthReportUpload.jsx  # Report upload functionality
-│   │   │   ├── HealthInsights.jsx      # AI insights display
-│   │   │   └── RoleBasedDashboard.jsx  # Role-based routing
-│   │   ├── contexts/           # React Context for state management
-│   │   ├── utils/              # API utilities and constants
-│   │   └── assets/             # Static assets and images
-│   └── package.json
-├── server/                     # Node.js Backend API
-│   ├── controllers/            # Business logic controllers
-│   │   ├── auth.controllers.js         # Authentication logic
-│   │   ├── healthReport.controllers.js # Health report management
-│   │   ├── aiRecommendations.controllers.js # AI processing
-│   │   └── doctorReview.controllers.js # Doctor review system
-│   ├── models/                 # MongoDB data models
-│   │   ├── user.models.js      # User schema
-│   │   ├── healthReport.models.js      # Health report schema
-│   │   └── recommendation.model.js     # AI recommendation schema
-│   ├── routes/                 # API route definitions
-│   ├── middleware/             # Authentication and validation
-│   ├── services/               # External service integrations
-│   │   └── aiRecommendationService.js  # OpenAI integration
-│   └── server.js               # Application entry point
-└── README.md
+│   │   ├── components/              # React Components
+│   │   │   ├── auth/
+│   │   │   │   ├── Login.jsx        # User authentication
+│   │   │   │   └── SignUp.jsx       # User registration
+│   │   │   ├── dashboard/
+│   │   │   │   ├── PatientDashboard.jsx     # Patient interface
+│   │   │   │   ├── DoctorDashboard.jsx      # Doctor interface
+│   │   │   │   └── RoleBasedDashboard.jsx   # Role routing
+│   │   │   ├── health/
+│   │   │   │   ├── HealthReportUpload.jsx   # Report upload
+│   │   │   │   ├── HealthInsights.jsx       # AI insights display
+│   │   │   │   └── ReportAnalysis.jsx       # Report analysis
+│   │   │   ├── doctor/
+│   │   │   │   ├── ReviewQueue.jsx          # Pending reviews
+│   │   │   │   ├── RecommendationReview.jsx # Review interface
+│   │   │   │   └── DoctorStats.jsx          # Analytics
+│   │   │   └── common/
+│   │   │       ├── Header.jsx               # Navigation
+│   │   │       ├── Footer.jsx               # Footer component
+│   │   │       └── LoadingSpinner.jsx       # Loading states
+│   │   ├── contexts/                # React Context
+│   │   │   ├── AuthContext.jsx              # Authentication state
+│   │   │   └── HealthContext.jsx            # Health data state
+│   │   ├── hooks/                   # Custom React hooks
+│   │   │   ├── useAuth.js                   # Authentication hook
+│   │   │   └── useHealthData.js             # Health data hook
+│   │   ├── services/                # API services
+│   │   │   ├── api.js                       # API configuration
+│   │   │   ├── authService.js               # Auth API calls
+│   │   │   ├── healthService.js             # Health API calls
+│   │   │   └── doctorService.js             # Doctor API calls
+│   │   ├── utils/                   # Utility functions
+│   │   │   ├── constants.js                 # App constants
+│   │   │   ├── helpers.js                   # Helper functions
+│   │   │   └── validators.js                # Form validation
+│   │   ├── styles/                  # CSS styles
+│   │   │   ├── globals.css                  # Global styles
+│   │   │   └── components.css               # Component styles
+│   │   ├── App.jsx                  # Main app component
+│   │   └── main.jsx                 # App entry point
+│   ├── package.json                 # Frontend dependencies
+│   └── vite.config.js              # Vite configuration
+├── server/                          # Node.js Backend API
+│   ├── controllers/                 # Business logic
+│   │   ├── authController.js                # Authentication logic
+│   │   ├── healthReportController.js        # Health report management
+│   │   ├── aiRecommendationController.js    # AI processing
+│   │   ├── doctorReviewController.js        # Doctor review system
+│   │   └── userController.js                # User management
+│   ├── models/                      # MongoDB schemas
+│   │   ├── User.js                          # User model
+│   │   ├── HealthReport.js                  # Health report model
+│   │   ├── Recommendation.js                # AI recommendation model
+│   │   └── DoctorReview.js                  # Doctor review model
+│   ├── routes/                      # API routes
+│   │   ├── authRoutes.js                    # Authentication routes
+│   │   ├── healthRoutes.js                  # Health report routes
+│   │   ├── aiRoutes.js                      # AI recommendation routes
+│   │   ├── doctorRoutes.js                  # Doctor review routes
+│   │   └── userRoutes.js                    # User management routes
+│   ├── middleware/                  # Express middleware
+│   │   ├── auth.js                          # JWT authentication
+│   │   ├── validation.js                    # Input validation
+│   │   ├── errorHandler.js                  # Error handling
+│   │   └── roleCheck.js                     # Role-based access
+│   ├── services/                    # External services
+│   │   ├── aiService.js                     # OpenAI integration
+│   │   ├── emailService.js                  # Email notifications
+│   │   └── fileService.js                   # File processing
+│   ├── config/                      # Configuration
+│   │   ├── database.js                      # MongoDB connection
+│   │   ├── openai.js                        # OpenAI configuration
+│   │   └── email.js                         # Email configuration
+│   ├── utils/                       # Utility functions
+│   │   ├── helpers.js                       # Helper functions
+│   │   ├── constants.js                     # Server constants
+│   │   └── logger.js                        # Logging utility
+│   ├── uploads/                     # File uploads directory
+│   ├── .env                         # Environment variables
+│   ├── package.json                 # Backend dependencies
+│   └── server.js                    # Application entry 
+├── .gitignore                       # Git ignore rules
+├── package.json                     # Root package.json
+└── README.md                        # Project documentation
 ```
 
 ## 🚀 Technology Stack
@@ -101,8 +160,14 @@ Before running this application, make sure you have:
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/your-username/ai-mavericks-thinkathon.git
-cd ai-mavericks-thinkathon
+# Clone the repository
+git clone https://github.com/krishilgandhi/AI-Mavericks_Thinkathon_1.0_2025.git
+
+# Navigate to project directory
+cd AI-Mavericks_Thinkathon_1.0_2025
+
+# Verify project structure
+ls -la
 ```
 
 ### 2. Backend Setup
@@ -127,6 +192,7 @@ Add the following environment variables to `.env`:
 ```env
 # Database Configuration
 MONGO_URI=mongodb://localhost:27017/healthcare-ai
+
 # or for MongoDB Atlas:
 # MONGO_URI=mongodb+srv://username:password@cluster.mongodb.net/healthcare-ai
 
@@ -135,6 +201,13 @@ JWT_SECRET=your-super-secret-jwt-key-here
 
 # OpenAI Configuration
 OPENAI_API_KEY=your-openai-api-key-here
+
+# Google Gemini Configuration
+GEMINI_API_KEY = your-gemini-api-key-here
+
+#Email Configuration
+EMAIL_USER=your-email
+EMAIL_PASS=your-app-password
 
 # Server Configuration
 PORT=5000
@@ -171,28 +244,194 @@ The client will run on `http://localhost:5173`
 
 ## 📝 API Documentation
 
-### Authentication Endpoints
-- `POST /api/auth/register` - User registration
-- `POST /api/auth/login` - User login
-- `POST /api/auth/forgot-password` - Password reset request
-- `POST /api/auth/reset-password` - Password reset confirmation
+**Base URL**: `http://localhost:5000/api`
 
-### Health Report Endpoints
-- `POST /api/health-reports/upload` - Upload and analyze health report
-- `GET /api/health-reports/patient` - Get patient's health reports
-- `GET /api/health-reports/:reportId` - Get specific report details
+### 🔐 Authentication Endpoints
 
-### AI Recommendations Endpoints
-- `GET /api/ai-recommendations/insights/:reportId` - Get AI health insights
-- `GET /api/ai-recommendations/personalized` - Get personalized recommendations
+#### Register User
+```http
+POST /api/auth/register
+Content-Type: application/json
 
-### Doctor Review Endpoints
-- `GET /api/doctor-review/stats` - Get doctor dashboard statistics
-- `GET /api/doctor-review/pending` - Get pending recommendations
-- `GET /api/doctor-review/assigned` - Get assigned recommendations
-- `POST /api/doctor-review/:id/approve` - Approve recommendation
-- `POST /api/doctor-review/:id/reject` - Reject recommendation
-- `POST /api/doctor-review/:id/update-ai` - Update AI based on feedback
+{
+  "fullName": "John Doe",
+  "email": "john@example.com",
+  "password": "password123",
+  "role": "patient",
+  "gender": "male",
+  "dateOfBirth": "1990-01-01",
+  "bloodGroup": "O+"
+}
+```
+**Response**: `{ "token": "jwt_token", "user": {...} }`
+
+#### Login User
+```http
+POST /api/auth/login
+Content-Type: application/json
+
+{
+  "email": "john@example.com",
+  "password": "password123"
+}
+```
+**Response**: `{ "token": "jwt_token", "user": {...} }`
+
+#### Reset Password
+```http
+POST /api/auth/forgot-password
+Content-Type: application/json
+
+{ "email": "john@example.com" }
+```
+
+### 🏥 Health Report Endpoints
+
+#### Upload Health Report
+```http
+POST /api/health-reports/upload
+Authorization: Bearer {token}
+Content-Type: multipart/form-data
+
+{
+  "reportType": "blood",
+  "file": "report.pdf",
+  "bloodMetrics": {
+    "cholesterol": 240,
+    "bloodSugar": 110,
+    "hemoglobin": 14.5
+  },
+  "patientNotes": "Feeling tired lately"
+}
+```
+**Response**: `{ "reportId": "...", "analysisStatus": "processing" }`
+
+#### Get Patient Reports
+```http
+GET /api/health-reports/patient
+Authorization: Bearer {token}
+```
+**Response**: `{ "reports": [...], "totalCount": 5 }`
+
+#### Get Specific Report
+```http
+GET /api/health-reports/{reportId}
+Authorization: Bearer {token}
+```
+**Response**: `{ "report": {...}, "recommendations": {...} }`
+
+### 🤖 AI Recommendations Endpoints
+
+#### Get AI Health Insights
+```http
+GET /api/ai-recommendations/insights/{reportId}
+Authorization: Bearer {token}
+```
+**Response**:
+```json
+{
+  "insights": {
+    "riskLevel": "moderate",
+    "healthScore": 72,
+    "keyFindings": ["High cholesterol", "Normal blood sugar"],
+    "recommendations": {
+      "medications": ["Atorvastatin 20mg daily"],
+      "lifestyle": ["Mediterranean diet", "30min daily exercise"],
+      "followUp": "3 months"
+    }
+  },
+  "confidenceScore": 0.87
+}
+```
+
+#### Get Personalized Recommendations
+```http
+GET /api/ai-recommendations/personalized
+Authorization: Bearer {token}
+```
+**Response**: `{ "recommendations": [...], "lastUpdated": "..." }`
+
+### 👨‍⚕️ Doctor Review Endpoints
+
+#### Get Doctor Dashboard Stats
+```http
+GET /api/doctor-review/stats
+Authorization: Bearer {doctor_token}
+```
+**Response**:
+```json
+{
+  "pendingReviews": 12,
+  "completedToday": 8,
+  "approvalRate": 0.85,
+  "avgReviewTime": "5.2 minutes"
+}
+```
+
+#### Get Pending Recommendations
+```http
+GET /api/doctor-review/pending?page=1&limit=10
+Authorization: Bearer {doctor_token}
+```
+**Response**: `{ "recommendations": [...], "pagination": {...} }`
+
+#### Approve Recommendation
+```http
+POST /api/doctor-review/{recommendationId}/approve
+Authorization: Bearer {doctor_token}
+Content-Type: application/json
+
+{
+  "doctorNotes": "Approved with minor modifications",
+  "modifications": {
+    "medications": ["Reduced dosage to 10mg"]
+  },
+  "aiAccuracyRating": 8
+}
+```
+**Response**: `{ "status": "approved", "notificationSent": true }`
+
+#### Reject Recommendation
+```http
+POST /api/doctor-review/{recommendationId}/reject
+Authorization: Bearer {doctor_token}
+Content-Type: application/json
+
+{
+  "reason": "Insufficient data for diagnosis",
+  "doctorNotes": "Requires additional blood work",
+  "aiAccuracyRating": 4
+}
+```
+
+### 📊 Error Responses
+
+**400 Bad Request**
+```json
+{ "error": "Validation failed", "details": [...] }
+```
+
+**401 Unauthorized**
+```json
+{ "error": "Invalid token" }
+```
+
+**403 Forbidden**
+```json
+{ "error": "Insufficient permissions" }
+```
+
+**500 Internal Server Error**
+```json
+{ "error": "Server error", "message": "..." }
+```
+
+### 🔑 Authentication Headers
+All protected endpoints require:
+```http
+Authorization: Bearer {jwt_token}
+Content-Type: application/json
+```
 
 ## 👥 User Roles & Permissions
 
@@ -309,12 +548,6 @@ cd ../server
 npm start
 ```
 
-### Deployment Options
-- **Heroku** - Easy deployment with MongoDB Atlas
-- **Vercel** - Frontend deployment with serverless functions
-- **DigitalOcean** - Full-stack deployment on droplets
-- **AWS** - Scalable cloud deployment
-
 ## 📈 Performance Optimization
 
 - **Code Splitting** - Lazy loading of components
@@ -322,11 +555,7 @@ npm start
 - **API Caching** - Intelligent caching strategies
 - **Database Indexing** - Optimized MongoDB queries
 
-## 📄 License
-
-This project is licensed under the ISC License - see the [LICENSE](LICENSE) file for details.
-
-## 👥 Team
+## 👥 Team - AI Mavericks
 
 - **Krishil Gandhi** - Frontend Development, UI/UX Design, Backend Developer & AI Integration
 
@@ -334,17 +563,6 @@ This project is licensed under the ISC License - see the [LICENSE](LICENSE) file
 
 For support and questions:
 - **Email**: krishil.gandhi@acldigital.com
-- **Documentation**: [Project Wiki](wiki-link)
-
-## 🔮 Future Enhancements
-
-- **Mobile App** - React Native mobile application
-- **Telemedicine** - Video consultation integration
-- **Wearable Integration** - Fitness tracker data integration
-- **Advanced Analytics** - Machine learning insights
-- **Multi-language Support** - Internationalization
-- **Voice Interface** - Voice-controlled interactions
-- **Blockchain Integration** - Secure health record storage
 
 ---
 
