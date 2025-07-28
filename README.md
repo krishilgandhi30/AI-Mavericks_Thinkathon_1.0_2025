@@ -37,88 +37,73 @@ AI-Mavericks_Thinkathon_1.0_2025/
 │   │   └── favicon.ico
 │   ├── src/
 │   │   ├── components/              # React Components
-│   │   │   ├── auth/
-│   │   │   │   ├── Login.jsx        # User authentication
-│   │   │   │   └── SignUp.jsx       # User registration
-│   │   │   ├── dashboard/
-│   │   │   │   ├── PatientDashboard.jsx     # Patient interface
-│   │   │   │   ├── DoctorDashboard.jsx      # Doctor interface
-│   │   │   │   └── RoleBasedDashboard.jsx   # Role routing
-│   │   │   ├── health/
-│   │   │   │   ├── HealthReportUpload.jsx   # Report upload
-│   │   │   │   ├── HealthInsights.jsx       # AI insights display
-│   │   │   │   └── ReportAnalysis.jsx       # Report analysis
-│   │   │   ├── doctor/
-│   │   │   │   ├── ReviewQueue.jsx          # Pending reviews
-│   │   │   │   ├── RecommendationReview.jsx # Review interface
-│   │   │   │   └── DoctorStats.jsx          # Analytics
-│   │   │   └── common/
-│   │   │       ├── Header.jsx               # Navigation
-│   │   │       ├── Footer.jsx               # Footer component
-│   │   │       └── LoadingSpinner.jsx       # Loading states
-│   │   ├── contexts/                # React Context
-│   │   │   ├── AuthContext.jsx              # Authentication state
-│   │   │   └── HealthContext.jsx            # Health data state
-│   │   ├── hooks/                   # Custom React hooks
-│   │   │   ├── useAuth.js                   # Authentication hook
-│   │   │   └── useHealthData.js             # Health data hook
-│   │   ├── services/                # API services
-│   │   │   ├── api.js                       # API configuration
-│   │   │   ├── authService.js               # Auth API calls
-│   │   │   ├── healthService.js             # Health API calls
-│   │   │   └── doctorService.js             # Doctor API calls
-│   │   ├── utils/                   # Utility functions
-│   │   │   ├── constants.js                 # App constants
-│   │   │   ├── helpers.js                   # Helper functions
-│   │   │   └── validators.js                # Form validation
+│   │   │   ├── Login.jsx            # User authentication
+│   │   │   ├── SignUp.jsx           # User registration
+│   │   │   ├── ForgotPassword.jsx   # Password reset
+│   │   │   ├── ResetPassword.jsx    # Password reset confirmation
+│   │   │   ├── PatientDashboard.jsx # Patient interface
+│   │   │   ├── DoctorDashboard.jsx  # Doctor interface
+│   │   │   ├── RoleBasedDashboard.jsx # Role routing
+│   │   │   ├── HealthReportUpload.jsx # Report upload
+│   │   │   ├── HealthInsights.jsx   # AI insights display
+│   │   │   ├── PatientAnalysis.jsx  # Patient analysis
+│   │   │   ├── ProtectedRoute.jsx   # Route protection
+│   │   │   └── Toast.jsx            # Notification component
+│   │   ├── contexts/                # React Context (Future)
+│   │   ├── hooks/                   # Custom React hooks (Future)
+│   │   ├── services/                # API services (Future)
+│   │   ├── utils/                   # Utility functions (Future)
 │   │   ├── styles/                  # CSS styles
-│   │   │   ├── globals.css                  # Global styles
-│   │   │   └── components.css               # Component styles
+│   │   │   └── *.css                # Component styles
 │   │   ├── App.jsx                  # Main app component
 │   │   └── main.jsx                 # App entry point
 │   ├── package.json                 # Frontend dependencies
 │   └── vite.config.js              # Vite configuration
 ├── server/                          # Node.js Backend API
 │   ├── controllers/                 # Business logic
-│   │   ├── authController.js                # Authentication logic
-│   │   ├── healthReportController.js        # Health report management
-│   │   ├── aiRecommendationController.js    # AI processing
-│   │   ├── doctorReviewController.js        # Doctor review system
-│   │   └── userController.js                # User management
+│   │   ├── authController.js        # Authentication logic
+│   │   ├── healthReportController.js # Health report management
+│   │   ├── aiRecommendationController.js # AI processing
+│   │   ├── doctorReviewController.js # Doctor review system
+│   │   └── userController.js        # User management
 │   ├── models/                      # MongoDB schemas
-│   │   ├── User.js                          # User model
-│   │   ├── HealthReport.js                  # Health report model
-│   │   ├── Recommendation.js                # AI recommendation model
-│   │   └── DoctorReview.js                  # Doctor review model
+│   │   ├── User.js                  # User model
+│   │   ├── HealthReport.js          # Health report model
+│   │   ├── Recommendation.js        # AI recommendation model
+│   │   └── DoctorReview.js          # Doctor review model
 │   ├── routes/                      # API routes
-│   │   ├── authRoutes.js                    # Authentication routes
-│   │   ├── healthRoutes.js                  # Health report routes
-│   │   ├── aiRoutes.js                      # AI recommendation routes
-│   │   ├── doctorRoutes.js                  # Doctor review routes
-│   │   └── userRoutes.js                    # User management routes
+│   │   ├── authRoutes.js            # Authentication routes
+│   │   ├── healthRoutes.js          # Health report routes
+│   │   ├── aiRoutes.js              # AI recommendation routes
+│   │   ├── doctorRoutes.js          # Doctor review routes
+│   │   └── userRoutes.js            # User management routes
 │   ├── middleware/                  # Express middleware
-│   │   ├── auth.js                          # JWT authentication
-│   │   ├── validation.js                    # Input validation
-│   │   ├── errorHandler.js                  # Error handling
-│   │   └── roleCheck.js                     # Role-based access
+│   │   ├── auth.js                  # JWT authentication
+│   │   ├── validation.js            # Input validation
+│   │   ├── errorHandler.js          # Error handling
+│   │   └── roleCheck.js             # Role-based access
 │   ├── services/                    # External services
-│   │   ├── aiService.js                     # OpenAI integration
-│   │   ├── emailService.js                  # Email notifications
-│   │   └── fileService.js                   # File processing
+│   │   ├── aiService.js             # OpenAI integration
+│   │   ├── emailService.js          # Email notifications
+│   │   └── fileService.js           # File processing
 │   ├── config/                      # Configuration
-│   │   ├── database.js                      # MongoDB connection
-│   │   ├── openai.js                        # OpenAI configuration
-│   │   └── email.js                         # Email configuration
+│   │   ├── database.js              # MongoDB connection
+│   │   ├── openai.js                # OpenAI configuration
+│   │   └── email.js                 # Email configuration
 │   ├── utils/                       # Utility functions
-│   │   ├── helpers.js                       # Helper functions
-│   │   ├── constants.js                     # Server constants
-│   │   └── logger.js                        # Logging utility
+│   │   ├── helpers.js               # Helper functions
+│   │   ├── constants.js             # Server constants
+│   │   └── logger.js                # Logging utility
 │   ├── uploads/                     # File uploads directory
 │   ├── .env                         # Environment variables
 │   ├── package.json                 # Backend dependencies
-│   └── server.js                    # Application entry 
+│   └── server.js                    # Application entry point
+├── docs/                            # Documentation (Future)
 ├── .gitignore                       # Git ignore rules
 ├── package.json                     # Root package.json
+├── Video_Script.md                  # Video presentation script
+├── Presentation_Slides.md           # Slide presentation content
+├── Solution_Document.md             # Technical solution document
 └── README.md                        # Project documentation
 ```
 
@@ -168,6 +153,9 @@ cd AI-Mavericks_Thinkathon_1.0_2025
 
 # Verify project structure
 ls -la
+
+# Check client and server directories
+ls client/ server/
 ```
 
 ### 2. Backend Setup
@@ -263,7 +251,6 @@ Content-Type: application/json
   "bloodGroup": "O+"
 }
 ```
-**Response**: `{ "token": "jwt_token", "user": {...} }`
 
 #### Login User
 ```http
@@ -275,14 +262,24 @@ Content-Type: application/json
   "password": "password123"
 }
 ```
-**Response**: `{ "token": "jwt_token", "user": {...} }`
 
-#### Reset Password
+#### Forgot Password
 ```http
 POST /api/auth/forgot-password
 Content-Type: application/json
 
 { "email": "john@example.com" }
+```
+
+#### Reset Password
+```http
+POST /api/auth/reset-password
+Content-Type: application/json
+
+{
+  "token": "reset_token",
+  "newPassword": "newpassword123"
+}
 ```
 
 ### 🏥 Health Report Endpoints
@@ -304,21 +301,18 @@ Content-Type: multipart/form-data
   "patientNotes": "Feeling tired lately"
 }
 ```
-**Response**: `{ "reportId": "...", "analysisStatus": "processing" }`
 
 #### Get Patient Reports
 ```http
 GET /api/health-reports/patient
 Authorization: Bearer {token}
 ```
-**Response**: `{ "reports": [...], "totalCount": 5 }`
 
 #### Get Specific Report
 ```http
 GET /api/health-reports/{reportId}
 Authorization: Bearer {token}
 ```
-**Response**: `{ "report": {...}, "recommendations": {...} }`
 
 ### 🤖 AI Recommendations Endpoints
 
@@ -327,29 +321,12 @@ Authorization: Bearer {token}
 GET /api/ai-recommendations/insights/{reportId}
 Authorization: Bearer {token}
 ```
-**Response**:
-```json
-{
-  "insights": {
-    "riskLevel": "moderate",
-    "healthScore": 72,
-    "keyFindings": ["High cholesterol", "Normal blood sugar"],
-    "recommendations": {
-      "medications": ["Atorvastatin 20mg daily"],
-      "lifestyle": ["Mediterranean diet", "30min daily exercise"],
-      "followUp": "3 months"
-    }
-  },
-  "confidenceScore": 0.87
-}
-```
 
 #### Get Personalized Recommendations
 ```http
 GET /api/ai-recommendations/personalized
 Authorization: Bearer {token}
 ```
-**Response**: `{ "recommendations": [...], "lastUpdated": "..." }`
 
 ### 👨‍⚕️ Doctor Review Endpoints
 
@@ -358,22 +335,12 @@ Authorization: Bearer {token}
 GET /api/doctor-review/stats
 Authorization: Bearer {doctor_token}
 ```
-**Response**:
-```json
-{
-  "pendingReviews": 12,
-  "completedToday": 8,
-  "approvalRate": 0.85,
-  "avgReviewTime": "5.2 minutes"
-}
-```
 
 #### Get Pending Recommendations
 ```http
 GET /api/doctor-review/pending?page=1&limit=10
 Authorization: Bearer {doctor_token}
 ```
-**Response**: `{ "recommendations": [...], "pagination": {...} }`
 
 #### Approve Recommendation
 ```http
@@ -389,42 +356,6 @@ Content-Type: application/json
   "aiAccuracyRating": 8
 }
 ```
-**Response**: `{ "status": "approved", "notificationSent": true }`
-
-#### Reject Recommendation
-```http
-POST /api/doctor-review/{recommendationId}/reject
-Authorization: Bearer {doctor_token}
-Content-Type: application/json
-
-{
-  "reason": "Insufficient data for diagnosis",
-  "doctorNotes": "Requires additional blood work",
-  "aiAccuracyRating": 4
-}
-```
-
-### 📊 Error Responses
-
-**400 Bad Request**
-```json
-{ "error": "Validation failed", "details": [...] }
-```
-
-**401 Unauthorized**
-```json
-{ "error": "Invalid token" }
-```
-
-**403 Forbidden**
-```json
-{ "error": "Insufficient permissions" }
-```
-
-**500 Internal Server Error**
-```json
-{ "error": "Server error", "message": "..." }
-```
 
 ### 🔑 Authentication Headers
 All protected endpoints require:
@@ -432,6 +363,16 @@ All protected endpoints require:
 Authorization: Bearer {jwt_token}
 Content-Type: application/json
 ```
+
+### 📋 Request/Response Examples
+
+**Complete Patient Registration Flow**
+```bash
+
+# 1. Login
+curl -X POST http://localhost:5000/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"krishil.gandhi+patient@acldigital.com","password":"Test@123"}'
 
 ## 👥 User Roles & Permissions
 

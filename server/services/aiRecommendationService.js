@@ -1,19 +1,26 @@
 import OpenAI from "openai";
+import axios from "axios";
+
 // Enhanced AI Health Recommendation Service
 class AIHealthRecommendationService {
   constructor() {
     // Initialize OpenAI with API key from environment variables
-    const apiKey = process.env.OPENAI_API_KEY || 'your-api-key-here';
-    console.log(`Initializing OpenAI with API key: ${apiKey.substring(0, 5)}...${apiKey.substring(apiKey.length - 4)}`);
+    const openaiApiKey = process.env.OPENAI_API_KEY || 'your-openai-api-key-here';
+    console.log(`Initializing OpenAI with API key: ${openaiApiKey.substring(0, 5)}...${openaiApiKey.substring(openaiApiKey.length - 4)}`);
     this.openai = new OpenAI({
-      apiKey: apiKey
+      apiKey: openaiApiKey
     });
+
+    // Initialize Gemini configuration
+    this.geminiApiKey = process.env.GEMINI_API_KEY || 'your-gemini-api-key-here';
+    this.geminiApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${this.geminiApiKey}`;
+    console.log(`Gemini API configured with key: ${this.geminiApiKey.substring(0, 5)}...${this.geminiApiKey.substring(this.geminiApiKey.length - 4)}`);
   }
 
   // Enhanced AI analysis with more sophisticated logic
   async generateHealthRecommendations(reportData, patientProfile = {}) {
-    const { bloodMetrics, urineMetrics, reportType, patientNotes } = reportData;
-    const { age, gender, bloodGroup, medicalHistory = [], currentMedications = [] } = patientProfile;
+    const { bloodMetrics, urineMetrics, reportType } = reportData;
+    const { gender } = patientProfile;
 
     const analysis = {
       treatmentPlan: {
@@ -327,90 +334,193 @@ class AIHealthRecommendationService {
     }
   }
 
-  // Integration with OpenAI for AI-generated health insights
-  async getAIInsights(reportData, patientProfile) {
-    console.log("Processing report data with OpenAI");
+  // Helper function to create a standardized prompt for both AI services
+  createHealthAnalysisPrompt(reportData, patientProfile) {
     const report = reportData.reportId || reportData;
+    const metrics = report.bloodMetrics || report.urineMetrics || {};
+    const reportType = report.reportType || "health";
+    const doctorFeedback = reportData.doctorFeedbackToAI || "";
+
+    return `Analyze this health report and provide medical recommendations:
+      Patient: ${patientProfile.age || 30} year old ${patientProfile.gender || 'unknown'}, Blood Group: ${patientProfile.bloodGroup || 'unknown'}
+      Report Type: ${reportType}
+      Doctor Feedback: ${doctorFeedback}
+      Metrics: ${JSON.stringify(metrics)}
+      Based on the above data${doctorFeedback ? ' and doctor feedback' : ''}, provide a comprehensive health analysis in JSON format with the following structure:
+      {
+        "treatmentPlan": {
+          "medications": [{"name": "...", "dosage": "...", "frequency": "...", "duration": "...", "notes": "..."}],
+          "procedures": ["..."],
+          "followUpTests": ["..."],
+          "summary": "...",
+          "emergencyWarnings": ["..."]
+        },
+        "lifestyleChanges": {
+          "diet": ["..."],
+          "exercise": ["..."],
+          "habits": ["..."],
+          "precautions": ["..."],
+          "supplements": ["..."],
+          "summary": "..."
+        },
+        "riskFactors": ["..."],
+        "healthScore": 75,
+        "urgencyLevel": "low|medium|high",
+        "confidenceScore": 0.8,
+        "nextAppointmentSuggestion": "routine|follow-up|urgent",
+        "preventiveRecommendations": ["..."]
+      }`;
+  }
+
+  // OpenAI-specific implementation
+  async getOpenAIInsights(reportData, patientProfile) {
+    console.log("Processing report data with OpenAI");
+    
     try {
-      // Extract report data and metrics
-      const metrics = report.bloodMetrics || report.urineMetrics || {};
-      const reportType = report.reportType || "health";
-      
-      // Include doctor feedback if available
+      const prompt = this.createHealthAnalysisPrompt(reportData, patientProfile);
       const doctorFeedback = reportData.doctorFeedbackToAI || "";
-      
-      // Prepare the prompt for OpenAI
-      const prompt = `Analyze this health report and provide medical recommendations:
-        Patient: ${patientProfile.age || 30} year old ${patientProfile.gender || 'unknown'}, Blood Group: ${patientProfile.bloodGroup || 'unknown'}
-        Report Type: ${reportType}
-        Metrics: ${JSON.stringify(metrics)}
-        Doctor Feedback: ${doctorFeedback}
-        
-        Based on the above data${doctorFeedback ? ' and doctor feedback' : ''}, provide a comprehensive health analysis in JSON format with the following structure:
-        {
-          "treatmentPlan": {
-            "medications": [{"name": "...", "dosage": "...", "frequency": "...", "duration": "...", "notes": "..."}],
-            "procedures": ["..."],
-            "followUpTests": ["..."],
-            "summary": "...",
-            "emergencyWarnings": ["..."]
-          },
-          "lifestyleChanges": {
-            "diet": ["..."],
-            "exercise": ["..."],
-            "habits": ["..."],
-            "precautions": ["..."],
-            "supplements": ["..."],
-            "summary": "..."
-          },
-          "riskFactors": ["..."],
-          "healthScore": 75,
-          "urgencyLevel": "low|medium|high",
-          "confidenceScore": 0.8,
-          "nextAppointmentSuggestion": "routine|follow-up|urgent",
-          "preventiveRecommendations": ["..."]
-        }`;
 
       console.log('Calling OpenAI API for health insights...');
+      
       // Call OpenAI API
       const response = await this.openai.chat.completions.create({
-        model: "gpt-3.5-turbo", // Using a more widely available model
+        model: "gpt-3.5-turbo",
         messages: [{ role: "user", content: prompt }],
         temperature: 0.3,
         max_tokens: 2000
       });
+      
       console.log('OpenAI API response received for health insights');
 
       // Parse the response
       const aiResponse = response.choices[0].message.content;
-      console.log("AI response received");
-      
-      try {
-        // Extract JSON from the response
-        const jsonMatch = aiResponse.match(/\{[\s\S]*\}/);  
-        const jsonString = jsonMatch ? jsonMatch[0] : null;
-        
-        if (jsonString) {
-          const aiAnalysis = JSON.parse(jsonString);
-          
-          // Add note if this was based on doctor feedback
-          if (doctorFeedback) {
-            aiAnalysis.treatmentPlan.summary = `UPDATED BASED ON DOCTOR FEEDBACK: ${aiAnalysis.treatmentPlan.summary}`;
-            aiAnalysis.confidenceScore = Math.min(1.0, (aiAnalysis.confidenceScore || 0.8) + 0.1);
-          }
-          
-          return aiAnalysis;
-        } else {
-          throw new Error("No valid JSON found in AI response");
+      console.log("OpenAI response received");
+
+      // Extract JSON from the response
+      const jsonMatch = aiResponse.match(/\{[\s\S]*\}/);
+      const jsonString = jsonMatch ? jsonMatch[0] : null;
+
+      if (jsonString) {
+        const aiAnalysis = JSON.parse(jsonString);
+
+        // Add note if this was based on doctor feedback
+        if (doctorFeedback) {
+          aiAnalysis.treatmentPlan.summary = `UPDATED BASED ON DOCTOR FEEDBACK: ${aiAnalysis.treatmentPlan.summary}`;
+          aiAnalysis.confidenceScore = Math.min(1.0, (aiAnalysis.confidenceScore || 0.8) + 0.1);
         }
-      } catch (parseError) {
-        console.error("Error parsing AI response:", parseError);
-        // Fall back to built-in recommendations if parsing fails
-        return this.generateHealthRecommendations(report, patientProfile);
+
+        aiAnalysis.aiProvider = "OpenAI";
+        return aiAnalysis;
+      } else {
+        throw new Error("No valid JSON found in OpenAI response");
       }
     } catch (error) {
       console.error('OpenAI API error:', error);
-      // Fall back to built-in recommendations if API call fails
+      throw error;
+    }
+  }
+
+  // Gemini-specific implementation
+  async getGeminiInsights(reportData, patientProfile) {
+    console.log("Processing report data with Gemini");
+    
+    try {
+      const prompt = this.createHealthAnalysisPrompt(reportData, patientProfile);
+      console.log("Prompt for Gemini:::::::::::::", prompt);
+      
+      const doctorFeedback = reportData.doctorFeedbackToAI || "";
+
+      const requestBody = {
+        contents: [{
+          parts: [{ text: prompt }]
+        }]
+      };
+
+      console.log("Sending request to Gemini API...");
+      
+      const response = await axios.post(this.geminiApiUrl, requestBody, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      console.log('Gemini API response received for health insights');
+
+      // Extract the JSON string from the API's response
+      const rawText = response.data.candidates[0].content.parts[0].text;
+
+      // Clean the response to ensure it's valid JSON
+      let jsonString = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
+      const jsonStart = jsonString.indexOf('{');
+      const jsonEnd = jsonString.lastIndexOf('}');
+      jsonString = jsonString.substring(jsonStart, jsonEnd + 1);
+
+      // Parse the JSON string into an object
+      const aiAnalysis = JSON.parse(jsonString);
+
+      // Add note if this was based on doctor feedback
+      if (doctorFeedback) {
+        aiAnalysis.treatmentPlan.summary = `UPDATED BASED ON DOCTOR FEEDBACK: ${aiAnalysis.treatmentPlan.summary}`;
+        aiAnalysis.confidenceScore = Math.min(1.0, (aiAnalysis.confidenceScore || 0.8) + 0.1);
+      }
+
+      aiAnalysis.aiProvider = "Gemini";
+      console.log("Gemini recommendations processed:", aiAnalysis);
+      return aiAnalysis;
+
+    } catch (error) {
+      console.error("Error calling Gemini API:", error.response ? error.response.data : error.message);
+      throw error;
+    }
+  }
+
+  // Main function that conditionally uses OpenAI or Gemini
+  async getAIInsights(reportData, patientProfile, options = {}) {
+    const { provider = 'openai', fallbackProvider = true } = options;
+    
+    console.log(`Processing report data with ${provider.toUpperCase()}`);
+    
+    try {
+      let aiAnalysis;
+      
+      // Try the primary provider
+      if (provider.toLowerCase() === 'gemini') {
+        aiAnalysis = await this.getGeminiInsights(reportData, patientProfile);
+      } else {
+        aiAnalysis = await this.getOpenAIInsights(reportData, patientProfile);
+      }
+      
+      return aiAnalysis;
+      
+    } catch (error) {
+      console.error(`${provider.toUpperCase()} API error:`, error);
+      
+      // Try fallback provider if enabled
+      if (fallbackProvider) {
+        console.log(`Attempting fallback to ${provider.toLowerCase() === 'gemini' ? 'OpenAI' : 'Gemini'}...`);
+        
+        try {
+          let fallbackAnalysis;
+          
+          if (provider.toLowerCase() === 'gemini') {
+            // Fallback to OpenAI
+            fallbackAnalysis = await this.getOpenAIInsights(reportData, patientProfile);
+          } else {
+            // Fallback to Gemini
+            fallbackAnalysis = await this.getGeminiInsights(reportData, patientProfile);
+          }
+          
+          fallbackAnalysis.isFallback = true;
+          return fallbackAnalysis;
+          
+        } catch (fallbackError) {
+          console.error('Fallback provider also failed:', fallbackError);
+        }
+      }
+      
+      // If all AI providers fail, fall back to built-in recommendations
+      console.log('All AI providers failed, using built-in recommendations');
+      const report = reportData.reportId || reportData;
       return this.generateHealthRecommendations(report, patientProfile);
     }
   }

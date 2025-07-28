@@ -98,16 +98,35 @@ export const sendPatientReminder = async (req, res) => {
             to: patient.email,
             subject: subject || 'Health Reminder from Your Doctor',
             html: `
-                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px;">
-                    <h2>Health Reminder</h2>
-                    <p>Dear ${patient.fullName},</p>
-                    <p>${message || 'This is a reminder about your health plan and recommended actions.'}</p>
-                    ${actionItemsHtml}
-                    <p>Please contact us if you have any questions.</p>
-                    <p>Best regards,<br>Dr. ${doctor.fullName}</p>
+                <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 0; background: #f7f9fb; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.07); border: 1px solid #e3e7ed;">
+                  <div style="background: linear-gradient(90deg, #4f8cff 0%, #38c6fa 100%); color: #fff; padding: 24px 32px 16px 32px; border-top-left-radius: 12px; border-top-right-radius: 12px;">
+                    <h2 style="margin: 0; font-size: 2rem; font-weight: 700; letter-spacing: 1px;">Health Reminder</h2>
+                  </div>
+                  <div style="padding: 24px 32px;">
+                    <p style="font-size: 1.1rem; margin-bottom: 8px;">Dear <span style="font-weight: 600; color: #4f8cff;">${patient.fullName}</span>,</p>
+                    <p style="font-size: 1.05rem; margin-bottom: 18px;">${message || 'This is a reminder about your health plan and recommended actions.'}</p>
+                    ${actionItems && actionItems.length > 0 ? `
+                      <div style="margin-bottom: 18px;">
+                        <h3 style="color: #38c6fa; font-size: 1.1rem; margin-bottom: 8px;">Recommended Actions:</h3>
+                        <ul style="padding-left: 18px;">
+                          ${actionItems.map(item => `
+                            <li style="margin-bottom: 8px; font-size: 1rem;">
+                              <span style="background: #e3f3ff; color: #4f8cff; padding: 6px 14px; border-radius: 20px; font-weight: 500; display: inline-block;">${item}</span>
+                            </li>
+                          `).join('')}
+                        </ul>
+                        <a href="mailto:${process.env.EMAIL_USER || 'healthcareai@example.com'}" style="display: inline-block; margin-top: 10px; background: linear-gradient(90deg, #4f8cff 0%, #38c6fa 100%); color: #fff; text-decoration: none; padding: 10px 28px; border-radius: 24px; font-weight: 600; font-size: 1rem; box-shadow: 0 1px 4px rgba(79,140,255,0.12); transition: background 0.2s;">Contact Doctor</a>
+                      </div>
+                    ` : ''}
+                    <p style="font-size: 1rem; color: #555; margin-bottom: 18px;">Please contact us if you have any questions.</p>
+                    <p style="font-size: 1rem; color: #888;">Best regards,<br><span style="font-weight: 600; color: #4f8cff;">Dr. ${doctor.fullName}</span></p>
+                  </div>
                 </div>
             `
         };
+
+        console.log('Sending reminder email to:', mailOptions);
+        
 
         // Send email
         await transporter.sendMail(mailOptions);

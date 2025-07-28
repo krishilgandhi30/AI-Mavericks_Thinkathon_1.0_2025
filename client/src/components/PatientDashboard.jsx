@@ -19,6 +19,11 @@ const PatientDashboard = ({ userData }) => {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [editProfile, setEditProfile] = useState(false);
   const [editForm, setEditForm] = useState({});
+  // Add flags to prevent duplicate API calls
+  const [dataFetched, setDataFetched] = useState({
+    healthReports: false,
+    personalizedRecommendations: false
+  });
   const navigate = useNavigate();
   const userMenuRef = useRef(null);
 
@@ -46,21 +51,25 @@ const PatientDashboard = ({ userData }) => {
     // If userData is provided as prop, use it instead of fetching
     if (userData) {
       setUser(userData);
-      setLoading(false); // Set loading to false when userData is provided
+      setLoading(false);
     } else if (!user) {
       fetchUserData();
     } else {
-      setLoading(false); // Ensure loading is set to false when user is already set
+      setLoading(false);
     }
   }, [userData]);
 
-  // Separate effect for fetching reports to avoid dependency issues
+  // Fetch data only when needed for specific tabs
   useEffect(() => {
-    if (activeTab === "reports" || activeTab === "dashboard" || activeTab === "upload") {
-      fetchHealthReports();
-      fetchPersonalizedRecommendations();
+    if (user) {
+      if ((activeTab === "reports" || activeTab === "dashboard") && !dataFetched.healthReports) {
+        fetchHealthReports();
+      }
+      if (activeTab === "personalized-plan" && !dataFetched.personalizedRecommendations) {
+        fetchPersonalizedRecommendations();
+      }
     }
-  }, [activeTab]);
+  }, [activeTab, user, dataFetched]);
 
   const fetchPersonalizedRecommendations = async () => {
     try {
@@ -71,6 +80,7 @@ const PatientDashboard = ({ userData }) => {
         headers: { Authorization: `Bearer ${token}` },
       });
       setPersonalizedRecommendations(response.data);
+      setDataFetched(prev => ({ ...prev, personalizedRecommendations: true }));
     } catch (error) {
       console.error("Error fetching personalized recommendations:", error);
       // Demo data for development
@@ -89,6 +99,7 @@ const PatientDashboard = ({ userData }) => {
           actionItems: ["Schedule follow-up appointment", "Start meal planning", "Join diabetes education program"]
         }
       });
+      setDataFetched(prev => ({ ...prev, personalizedRecommendations: true }));
     }
   };
 
@@ -105,6 +116,14 @@ const PatientDashboard = ({ userData }) => {
       });
       setUser(response.data);
       setLoading(false);
+      
+      // After user is fetched, fetch other data if not already fetched
+      if (!dataFetched.healthReports) {
+        fetchHealthReports();
+      }
+      if (!dataFetched.personalizedRecommendations) {
+        fetchPersonalizedRecommendations();
+      }
     } catch (error) {
       console.error("Error fetching user data:", error);
       if (error.response?.status === 401) {
@@ -122,6 +141,14 @@ const PatientDashboard = ({ userData }) => {
           dateOfBirth: "1990-01-01",
         });
         setLoading(false);
+        
+        // After demo user is set, fetch other data if not already fetched
+        if (!dataFetched.healthReports) {
+          fetchHealthReports();
+        }
+        if (!dataFetched.personalizedRecommendations) {
+          fetchPersonalizedRecommendations();
+        }
       }
     }
   };
@@ -135,6 +162,7 @@ const PatientDashboard = ({ userData }) => {
         headers: { Authorization: `Bearer ${token}` },
       });
       setHealthReports(response.data.reports || []);
+      setDataFetched(prev => ({ ...prev, healthReports: true }));
     } catch (error) {
       console.error("Error fetching health reports:", error);
       // Demo data for development
@@ -161,6 +189,7 @@ const PatientDashboard = ({ userData }) => {
           },
         },
       ]);
+      setDataFetched(prev => ({ ...prev, healthReports: true }));
     }
   };
 
@@ -252,6 +281,16 @@ const PatientDashboard = ({ userData }) => {
   const handleLogout = () => {
     localStorage.removeItem("token");
     navigate("/login");
+  };
+
+  // Function to refresh data (useful after uploads or updates)
+  const refreshData = () => {
+    setDataFetched({
+      healthReports: false,
+      personalizedRecommendations: false
+    });
+    fetchHealthReports();
+    fetchPersonalizedRecommendations();
   };
 
   const getStatusBadge = (status) => {
@@ -422,6 +461,11 @@ const PatientDashboard = ({ userData }) => {
 
       setUser(response.data.user || response.data);
       setEditProfile(false);
+      // Reset dataFetched state to allow refetching with updated profile
+      setDataFetched({
+        healthReports: false,
+        personalizedRecommendations: false
+      });
       alert("Profile updated successfully!");
     } catch (error) {
       console.error("Error updating profile:", error);
@@ -605,11 +649,11 @@ const PatientDashboard = ({ userData }) => {
                 </span>
               </div>
               <div className="info-item">
-                <label>Upload Date:</label>
+                <label>Upload Date: </label>
                 <span>{new Date(reportDetails.createdAt).toLocaleDateString()}</span>
               </div>
               <div className="info-item">
-                <label>Status:</label>
+                <label>Status: </label>
                 <span className={`status-badge ${getStatusBadge(reportDetails.recommendation?.reviewStatus)}`}>
                   {!reportDetails.recommendation?.reviewStatus ? "PENDING" :
                    reportDetails.recommendation.reviewStatus === "pending" ? "DOCTOR WILL BE ASSIGNED SHORTLY" :
@@ -620,7 +664,7 @@ const PatientDashboard = ({ userData }) => {
               {reportDetails.recommendation?.doctorId && (
                 <div className="info-item">
                   <label>Reviewed by:</label>
-                  <span>Dr. {reportDetails.recommendation.doctorId.fullName}</span>
+                  <span> Dr. {reportDetails.recommendation.doctorId.fullName}</span>
                 </div>
               )}
             </div>
@@ -989,7 +1033,7 @@ const PatientDashboard = ({ userData }) => {
 
       <main className="dashboard-main">
         {activeTab === "dashboard" ? renderDashboard() : null}
-        {activeTab === "upload" ? <HealthReportUpload /> : null}
+        {activeTab === "upload" ? <HealthReportUpload onUploadSuccess={refreshData} /> : null}
         {activeTab === "reports" ? renderReports() : null}
         {activeTab === "report-detail" ? renderReportDetail() : null}
         {activeTab === "personalized-plan" ? renderPersonalizedPlan() : null}
