@@ -375,13 +375,13 @@ class AIHealthRecommendationService {
   // OpenAI-specific implementation
   async getOpenAIInsights(reportData, patientProfile) {
     console.log("Processing report data with OpenAI");
-    
+
     try {
       const prompt = this.createHealthAnalysisPrompt(reportData, patientProfile);
       const doctorFeedback = reportData.doctorFeedbackToAI || "";
 
       console.log('Calling OpenAI API for health insights...');
-      
+
       // Call OpenAI API
       const response = await this.openai.chat.completions.create({
         model: "gpt-3.5-turbo",
@@ -389,7 +389,7 @@ class AIHealthRecommendationService {
         temperature: 0.3,
         max_tokens: 2000
       });
-      
+
       console.log('OpenAI API response received for health insights');
 
       // Parse the response
@@ -423,10 +423,9 @@ class AIHealthRecommendationService {
   // Gemini-specific implementation
   async getGeminiInsights(reportData, patientProfile) {
     console.log("Processing report data with Gemini");
-    
+
     try {
       const prompt = this.createHealthAnalysisPrompt(reportData, patientProfile);
-      console.log("Prompt for Gemini:::::::::::::", prompt);
       
       const doctorFeedback = reportData.doctorFeedbackToAI || "";
 
@@ -437,7 +436,7 @@ class AIHealthRecommendationService {
       };
 
       console.log("Sending request to Gemini API...");
-      
+
       const response = await axios.post(this.geminiApiUrl, requestBody, {
         headers: {
           'Content-Type': 'application/json'
@@ -477,31 +476,31 @@ class AIHealthRecommendationService {
   // Main function that conditionally uses OpenAI or Gemini
   async getAIInsights(reportData, patientProfile, options = {}) {
     const { provider = 'openai', fallbackProvider = true } = options;
-    
+
     console.log(`Processing report data with ${provider.toUpperCase()}`);
-    
+
     try {
       let aiAnalysis;
-      
+
       // Try the primary provider
       if (provider.toLowerCase() === 'gemini') {
         aiAnalysis = await this.getGeminiInsights(reportData, patientProfile);
       } else {
         aiAnalysis = await this.getOpenAIInsights(reportData, patientProfile);
       }
-      
+
       return aiAnalysis;
-      
+
     } catch (error) {
       console.error(`${provider.toUpperCase()} API error:`, error);
-      
+
       // Try fallback provider if enabled
       if (fallbackProvider) {
         console.log(`Attempting fallback to ${provider.toLowerCase() === 'gemini' ? 'OpenAI' : 'Gemini'}...`);
-        
+
         try {
           let fallbackAnalysis;
-          
+
           if (provider.toLowerCase() === 'gemini') {
             // Fallback to OpenAI
             fallbackAnalysis = await this.getOpenAIInsights(reportData, patientProfile);
@@ -509,21 +508,342 @@ class AIHealthRecommendationService {
             // Fallback to Gemini
             fallbackAnalysis = await this.getGeminiInsights(reportData, patientProfile);
           }
-          
+
           fallbackAnalysis.isFallback = true;
           return fallbackAnalysis;
-          
+
         } catch (fallbackError) {
           console.error('Fallback provider also failed:', fallbackError);
         }
       }
-      
+
       // If all AI providers fail, fall back to built-in recommendations
       console.log('All AI providers failed, using built-in recommendations');
       const report = reportData.reportId || reportData;
       return this.generateHealthRecommendations(report, patientProfile);
     }
   }
+
+  // Helper function to create a standardized prompt for personalized health plans
+  createHealthPlanPrompt(reports, trends, patientProfile) {
+    // Extract key metrics from all reports
+    const reportMetrics = reports.map(report => {
+      const metrics = {};
+      if (report.bloodMetrics) {
+        Object.entries(report.bloodMetrics).forEach(([key, value]) => {
+          if (value && value.value) {
+            metrics[key] = value.value;
+          }
+        });
+      }
+      if (report.urineMetrics) {
+        Object.entries(report.urineMetrics).forEach(([key, value]) => {
+          if (value && value.value) {
+            metrics[key] = value.value;
+          }
+        });
+      }
+      return {
+        date: report.createdAt,
+        type: report.reportType,
+        metrics
+      };
+    });
+
+    return `Generate a personalized health plan based on multiple health reports over the past 6 months.
+
+                        Patient Profile:
+                        - Age: ${patientProfile.age}
+                        - Gender: ${patientProfile.gender}
+                        - Blood Group: ${patientProfile.bloodGroup || 'Unknown'}
+                        - Medical History: ${patientProfile.medicalHistory?.join(', ') || 'None reported'}
+                        - Current Medications: ${patientProfile.currentMedications?.join(', ') || 'None reported'}
+
+                        Health Report Trends (${reports.length} reports analyzed):
+                        ${JSON.stringify(trends, null, 2)}
+
+                        Report Metrics Summary:
+                        ${JSON.stringify(reportMetrics, null, 2)}
+
+                        Based on this data, create a comprehensive personalized health plan in JSON format with the following structure:
+                        {
+                        "priorities": ["Priority 1", "Priority 2"],
+                        "shortTermGoals": ["Goal 1", "Goal 2"],
+                        "longTermGoals": ["Goal 1", "Goal 2"],
+                        "actionItems": ["Action 1", "Action 2"],
+                        "riskMitigation": ["Risk mitigation strategy 1", "Risk mitigation strategy 2"],
+                        "successMetrics": ["Metric 1", "Metric 2"],
+                        "dietaryRecommendations": ["Recommendation 1", "Recommendation 2"],
+                        "exerciseRecommendations": ["Recommendation 1", "Recommendation 2"],
+                        "lifestyleChanges": ["Change 1", "Change 2"],
+                        "followUpSchedule": "Recommended follow-up schedule",
+                        "summary": "Brief summary of the health plan"
+                        }`;
+  }
+
+  // OpenAI-specific implementation for personalized health plans
+  async getOpenAIPersonalizedPlan(reports, trends, patientProfile) {
+    console.log("Generating personalized plan with OpenAI");
+
+    try {
+      const prompt = this.createHealthPlanPrompt(reports, trends, patientProfile);
+
+      console.log('Calling OpenAI API for personalized health plan...');
+
+      // Call OpenAI API
+      const response = await this.openai.chat.completions.create({
+        model: "gpt-3.5-turbo",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.3,
+        max_tokens: 2000
+      });
+
+      console.log('OpenAI API response received for personalized plan');
+
+      // Parse the response
+      const aiResponse = response.choices[0].message.content;
+
+      // Extract JSON from the response
+      const jsonMatch = aiResponse.match(/\{[\s\S]*\}/);
+      const jsonString = jsonMatch ? jsonMatch[0] : null;
+
+      if (jsonString) {
+        const aiPlan = JSON.parse(jsonString);
+        // Add metadata
+        aiPlan.generatedBy = 'OpenAI';
+        aiPlan.reportsAnalyzed = reports.length;
+        aiPlan.timeRange = '6 months';
+        aiPlan.aiProvider = 'OpenAI';
+        return aiPlan;
+      } else {
+        throw new Error("No valid JSON found in OpenAI response");
+      }
+    } catch (error) {
+      console.error('OpenAI API error for personalized plan:', error);
+      throw error;
+    }
+  }
+
+  // Gemini-specific implementation for personalized health plans
+  async getGeminiPersonalizedPlan(reports, trends, patientProfile) {
+    console.log("Generating personalized plan with Gemini");
+
+    try {
+      const prompt = this.createHealthPlanPrompt(reports, trends, patientProfile);
+
+      const requestBody = {
+        contents: [{
+          parts: [{ text: prompt }]
+        }]
+      };
+
+      console.log("Sending personalized plan request to Gemini API...");
+
+      const response = await axios.post(this.geminiApiUrl, requestBody, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      console.log('Gemini API response received for personalized plan');
+
+      // Extract the JSON string from the API's response
+      const rawText = response.data.candidates[0].content.parts[0].text;
+
+      // Clean the response to ensure it's valid JSON
+      let jsonString = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
+      const jsonStart = jsonString.indexOf('{');
+      const jsonEnd = jsonString.lastIndexOf('}');
+      jsonString = jsonString.substring(jsonStart, jsonEnd + 1);
+
+      // Parse the JSON string into an object
+      const aiPlan = JSON.parse(jsonString);
+
+      // Add metadata
+      aiPlan.generatedBy = 'Gemini';
+      aiPlan.reportsAnalyzed = reports.length;
+      aiPlan.timeRange = '6 months';
+      aiPlan.aiProvider = 'Gemini';
+      
+      console.log("Gemini personalized plan processed:", aiPlan);
+      return aiPlan;
+
+    } catch (error) {
+      console.error("Error calling Gemini API for personalized plan:", error.response ? error.response.data : error.message);
+      throw error;
+    }
+  }
+
+  // Main function for generating AI-powered personalized health plans with provider options
+  async generateAIPersonalizedPlan(reports, trends, patientProfile, options = {}) {
+    const { provider = 'openai', fallbackProvider = true } = options;
+
+    console.log(`Generating personalized plan with ${provider.toUpperCase()}`);
+
+    try {
+      let aiPlan;
+
+      // Try the primary provider
+      if (provider.toLowerCase() === 'gemini') {
+        aiPlan = await this.getGeminiPersonalizedPlan(reports, trends, patientProfile);
+      } else {
+        aiPlan = await this.getOpenAIPersonalizedPlan(reports, trends, patientProfile);
+      }
+
+      return aiPlan;
+
+    } catch (error) {
+      console.error(`${provider.toUpperCase()} API error for personalized plan:`, error);
+
+      // Try fallback provider if enabled
+      if (fallbackProvider) {
+        console.log(`Attempting fallback to ${provider.toLowerCase() === 'gemini' ? 'OpenAI' : 'Gemini'} for personalized plan...`);
+
+        try {
+          let fallbackPlan;
+
+          if (provider.toLowerCase() === 'gemini') {
+            // Fallback to OpenAI
+            fallbackPlan = await this.getOpenAIPersonalizedPlan(reports, trends, patientProfile);
+          } else {
+            // Fallback to Gemini
+            fallbackPlan = await this.getGeminiPersonalizedPlan(reports, trends, patientProfile);
+          }
+
+          fallbackPlan.isFallback = true;
+          return fallbackPlan;
+
+        } catch (fallbackError) {
+          console.error('Fallback provider also failed for personalized plan:', fallbackError);
+        }
+      }
+
+      // If all AI providers fail, fall back to built-in plan
+      console.log('All AI providers failed, using built-in personalized plan');
+      return this.generateFallbackPlan(reports, trends, patientProfile);
+    }
+  }
+
+  // Fallback function to generate personalized plan if AI fails
+  generateFallbackPlan(reports, trends, patientProfile) {
+    const plan = {
+      priorities: [],
+      shortTermGoals: [],
+      longTermGoals: [],
+      actionItems: [],
+      riskMitigation: [],
+      successMetrics: [],
+      dietaryRecommendations: [],
+      exerciseRecommendations: [],
+      lifestyleChanges: [],
+      followUpSchedule: "3 months",
+      summary: "Personalized health plan based on your recent health reports",
+      generatedBy: "System"
+    };
+
+    // Analyze concerning trends
+    if (trends.glucose.concern && trends.glucose.trend === 'increasing') {
+      plan.priorities.push('Diabetes Prevention/Management');
+      plan.shortTermGoals.push('Reduce blood glucose by 10% in 3 months');
+      plan.actionItems.push('Implement carbohydrate counting');
+      plan.actionItems.push('30-minute post-meal walks');
+      plan.riskMitigation.push('Regular glucose monitoring');
+      plan.successMetrics.push('Fasting glucose < 100 mg/dL');
+      plan.dietaryRecommendations.push('Low glycemic index diet');
+      plan.exerciseRecommendations.push('Regular moderate exercise, 150 minutes per week');
+    }
+
+    if (trends.cholesterol.concern && trends.cholesterol.trend === 'increasing') {
+      plan.priorities.push('Cardiovascular Health');
+      plan.shortTermGoals.push('Lower cholesterol levels within 6 months');
+      plan.actionItems.push('Heart-healthy Mediterranean diet');
+      plan.actionItems.push('150 minutes aerobic exercise weekly');
+      plan.successMetrics.push('Total cholesterol < 200 mg/dL');
+      plan.dietaryRecommendations.push('Reduce saturated fats and increase omega-3 fatty acids');
+      plan.exerciseRecommendations.push('Cardiovascular exercise 3-5 times per week');
+    }
+
+    // Age-specific recommendations
+    if (patientProfile.age > 50) {
+      plan.longTermGoals.push('Maintain bone density and muscle mass');
+      plan.actionItems.push('Resistance training 2-3x per week');
+      plan.successMetrics.push('Annual bone density within normal range');
+      plan.exerciseRecommendations.push('Weight-bearing exercises');
+      plan.dietaryRecommendations.push('Calcium and vitamin D rich foods');
+    }
+
+    // General wellness goals
+    plan.longTermGoals.push('Maintain optimal health metrics');
+    plan.actionItems.push('Annual comprehensive health screening');
+    plan.actionItems.push('Stress management and adequate sleep');
+    plan.lifestyleChanges.push('Maintain 7-8 hours of quality sleep');
+    plan.lifestyleChanges.push('Practice stress reduction techniques');
+
+    return plan;
+  };
+
+  // Helper function to analyze trends across multiple reports
+  analyzeTrends(reports) {
+    const trends = {
+      glucose: { trend: 'stable', values: [], concern: false },
+      cholesterol: { trend: 'stable', values: [], concern: false },
+      hemoglobin: { trend: 'stable', values: [], concern: false },
+      overallHealthTrend: 'improving'
+    };
+
+    reports.forEach(report => {
+      if (report.bloodMetrics) {
+        if (report.bloodMetrics.glucose?.value) {
+          trends.glucose.values.push({
+            value: report.bloodMetrics.glucose.value,
+            date: report.createdAt
+          });
+        }
+        if (report.bloodMetrics.cholesterol?.value) {
+          trends.cholesterol.values.push({
+            value: report.bloodMetrics.cholesterol.value,
+            date: report.createdAt
+          });
+        }
+        if (report.bloodMetrics.hemoglobin?.value) {
+          trends.hemoglobin.values.push({
+            value: report.bloodMetrics.hemoglobin.value,
+            date: report.createdAt
+          });
+        }
+      }
+    });
+
+    // Calculate trends for each metric
+    Object.keys(trends).forEach(metric => {
+      if (trends[metric].values && trends[metric].values.length >= 2) {
+        const values = trends[metric].values.sort((a, b) => new Date(a.date) - new Date(b.date));
+        const recent = values.slice(-3).map(v => v.value);
+        const older = values.slice(0, -3).map(v => v.value);
+
+        if (recent.length > 0 && older.length > 0) {
+          const recentAvg = recent.reduce((sum, val) => sum + val, 0) / recent.length;
+          const olderAvg = older.reduce((sum, val) => sum + val, 0) / older.length;
+
+          const percentChange = ((recentAvg - olderAvg) / olderAvg) * 100;
+
+          if (percentChange > 5) {
+            trends[metric].trend = 'increasing';
+            if (metric === 'glucose' || metric === 'cholesterol') {
+              trends[metric].concern = percentChange > 10;
+            }
+          } else if (percentChange < -5) {
+            trends[metric].trend = 'decreasing';
+            if (metric === 'hemoglobin') {
+              trends[metric].concern = percentChange < -10;
+            }
+          }
+        }
+      }
+    });
+
+    return trends;
+  };
 }
 
 export default new AIHealthRecommendationService();
